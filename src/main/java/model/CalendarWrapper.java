@@ -2,6 +2,7 @@ package model;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Objects;
 
 /**
  * @overview
@@ -181,5 +182,131 @@ public class CalendarWrapper implements Cloneable {
         return this.cal.get(Calendar.YEAR);
     }
 
+    /**
+     * This function returns whether this CalendarWrapper's time is after the time
+     * represented by {@code another}.
+     * @param another the other time object to be compared.
+     * @requires anthoer != null
+     * @modifies None
+     * @effects None
+     * @return  {@code true} if the time reprsented by this CalendarWrapper is after
+     *          the time represented by {@code another}; {@code false} otherwise.
+     */
+    public boolean isAfter(CalendarWrapper another) {
+        return this.cal.after(another.cal);
+    }
 
+
+    /**
+     * This function returns a string representing the given time in the format of
+     * { MM/DD/YYYY @ HH:MM }
+     *
+     * @param year         year number
+     * @param month        a number represents the month number. The first month of
+     *                     the year starts from 1 (Jan)
+     * @param day          the day number; starts from 1 to 31
+     * @param hour         the hour number
+     * @param minute       the minute number
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return a String representing the given time in the format of { MM/DD/YYYY @ HH:MM }
+     */
+    public static String getTimeStr(int year, int month, int day, int hour, int minute) {
+        return  (((String.valueOf(month).length()) == 1) ? "0" : "") + month + "/" +
+                (((String.valueOf(day).length()) == 1) ? "0" : "") + day + "/" +
+                year + " @ " +
+                (((String.valueOf(hour).length()) == 1) ? "0" : "") + hour + ":" +
+                (((String.valueOf(minute).length()) == 1) ? "0" : "") + minute;
+    }
+
+    /**
+     * This function returns a CalendarWrapper instance representing the current time
+     *
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return a new CalendarWrapper instance
+     */
+    public static CalendarWrapper now() {
+        return new CalendarWrapper();
+    }
+
+    /**
+     * Creates and returns a copy of this object. The precise meaning
+     * of "copy" may depend on the class of the object.
+     * @return     a clone of this instance.
+     * @throws  CloneNotSupportedException  if the object's class does not
+     *               support the {@code Cloneable} interface. Subclasses
+     *               that override the {@code clone} method can also
+     *               throw this exception to indicate that an instance cannot
+     *               be cloned.
+     * @see java.lang.Cloneable
+     */
+    @Override
+    public CalendarWrapper clone() throws CloneNotSupportedException {
+        CalendarWrapper c = (CalendarWrapper) super.clone();
+        c.cal = this.cal;
+        return c;
+    }
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     * The {@code equals} method implements an equivalence relation
+     * on non-null object references
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @param   o   the reference object with which to compare.
+     * @return  {@code true} if this object is the same as the obj
+     *          argument; {@code false} otherwise.
+     * @see     #hashCode()
+     * @see     java.util.HashMap
+     */
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CalendarWrapper that = (CalendarWrapper) o;
+        return this.getYear() == that.getYear()
+                && this.getMonth() == that.getMonth()
+                && this.getDay() == that.getDay()
+                && this.getHourOfDay() == that.getHourOfDay()
+                && this.getMinuteOfHour() == that.getMinuteOfHour();
+    }
+
+    /**
+     * Returns a hash code value for the object. This method is
+     * supported for the benefit of hash tables
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return  a hash code value for this object.
+     * @see     java.lang.Object#equals(java.lang.Object)
+     * @see     java.lang.System#identityHashCode
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getYear(), this.getMonth(), this.getDay(),
+                this.getHourOfDay(), this.getMinuteOfHour()) * 13;
+    }
+
+    /**
+     * Returns a string representation of the object.
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return  a string representation of the object.
+     */
+    @Override
+    public String toString() {
+        return "CalendarWrapper ("
+                + CalendarWrapper.getTimeStr(getYear(), getMonth(),
+                        getDay(), getHourOfDay(), getMinuteOfHour())
+                + ')';
+    }
 }
