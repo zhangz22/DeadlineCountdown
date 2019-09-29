@@ -17,6 +17,7 @@ import java.util.Calendar;
  * courseName -> the deadlineName of the course
  *
  * @creators
+ * @creators
  * Deadline(Calendar date_, String name_, String course_)
  *
  * @mutator
