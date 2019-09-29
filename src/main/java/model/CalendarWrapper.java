@@ -42,7 +42,7 @@ public class CalendarWrapper implements Cloneable {
         this.cal = new GregorianCalendar();
         this.setYear(year);
         this.setMonth(month);
-        this.setDate(day);
+        this.setDay(day);
         this.setHour(hour);
         this.setMinute(minute);
     }
@@ -57,6 +57,9 @@ public class CalendarWrapper implements Cloneable {
      * @effects update the minute
      */
     public void setMinute(int minute) {
+        if (minute < 0 || minute > 59) {
+            throw new RuntimeException("Error: \"minute\" should be in range [0,59]");
+        }
         this.cal.set(Calendar.MINUTE, minute);
     }
 
@@ -70,19 +73,25 @@ public class CalendarWrapper implements Cloneable {
      * @effects update the hour
      */
     public void setHour(int hour) {
+        if (hour < 0 || hour > 59) {
+            throw new RuntimeException("Error: \"hour\" should be in range [0,59]");
+        }
         this.cal.set(Calendar.HOUR_OF_DAY, hour);
     }
 
     /**
      * This function updates the date of the date cal is representing
      *
-     * @param date the date number of a month. The first day of the month has value 1.
+     * @param day the date number of a month. The first day of the month has value 1.
      * @requires None
      * @modifies cal
      * @effects update the date
      */
-    public void setDate(int date) {
-        this.cal.set(Calendar.DATE, date);
+    public void setDay(int day) {
+        if (day < 1 || day > 31) {
+            throw new RuntimeException("Error: \"day\" should be in range [1,31]");
+        }
+        this.cal.set(Calendar.DATE, day);
     }
 
     /**
@@ -94,6 +103,9 @@ public class CalendarWrapper implements Cloneable {
      * @effects update the month
      */
     public void setMonth(int month) {
+        if (month < 1 || month > 12) {
+            throw new RuntimeException("Error: \"month\" should be in range [1,12]");
+        }
         this.cal.set(Calendar.MONTH, month-1);
     }
 
