@@ -6,9 +6,12 @@ import java.util.Objects;
 
 /**
  * @overview
- * This function is applying the adapter design pattern to Java's Calendar library to
+ * This class is applying the adapter design pattern to Java's Calendar library to
  * make some API get the expected behaviour that can coordinate with other APIs in
  * this program
+ *
+ * What's more, this class only needs to be accurate to second instead of millisecond
+ * which java.util.Calendar is accurate to.
  */
 public class CalendarWrapper implements Cloneable {
     /** cal: A Java Calendar instance containing current time.  */
@@ -197,6 +200,7 @@ public class CalendarWrapper implements Cloneable {
     /**
      * This function returns whether this CalendarWrapper's time is after the time
      * represented by {@code another}.
+     *
      * @param another the other time object to be compared.
      * @requires anthoer != null
      * @modifies None

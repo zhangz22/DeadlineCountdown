@@ -3,8 +3,9 @@ package model;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import java.util.Calendar;
+
+import static org.junit.Assert.*;
 
 /**
  * This class contains a set of test cases that can be used to test the
@@ -51,6 +52,56 @@ public class CalendarWrapperTest {
     }
 
     /////////////////////////////////////////////////////////////////////////
+    ////  setYear Test
+    /////////////////////////////////////////////////////////////////////////
+
+    @Test
+    public void setYearTest() {
+        time20190901.setYear(2018);
+        assertEquals(2018, time20190901.getYear());
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    ////  setMonthYear Test
+    /////////////////////////////////////////////////////////////////////////
+
+    @Test
+    public void setMonthTest() {
+        time20190901.setMonth(5);
+        assertEquals(5, time20190901.getMonth());
+    }
+
+    @Test
+    public void setMonthExceptTest() {
+        try {
+            time20190901.setMonth(13);
+        } catch (RuntimeException e) {
+            assertEquals(e.getMessage(), "Error: \"month\" should be in range [1,12]");
+        }
+        assertEquals(9, time20190901.getMonth());
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    ////  setDay Test
+    /////////////////////////////////////////////////////////////////////////
+
+    @Test
+    public void setDayTest() {
+        time20190901.setDay(5);
+        assertEquals(5, time20190901.getDay());
+    }
+
+    @Test
+    public void setDayExceptTest() {
+        try {
+            time20190901.setDay(32);
+        } catch (RuntimeException e) {
+            assertEquals(e.getMessage(), "Error: \"day\" should be in range [1,31]");
+        }
+        assertEquals(1, time20190901.getDay());
+    }
+
+    /////////////////////////////////////////////////////////////////////////
     ////  getMinuteOfHour Test
     /////////////////////////////////////////////////////////////////////////
 
@@ -86,8 +137,8 @@ public class CalendarWrapperTest {
 
     @Test
     public void getWeekDayTest() {
-        assertEquals(0, time20190901.getWeekDay());
-        assertEquals(6, time20190330.getWeekDay());
+        assertEquals(0, time20190901.getWeekDay());  // Sunday
+        assertEquals(6, time20190330.getWeekDay());  // Saturday
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -107,6 +158,84 @@ public class CalendarWrapperTest {
     @Test
     public void getYearTest() {
         assertEquals(2019, time20190901.getYear());
-        assertEquals(2019, time20190330.getYear());
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    ////  isAfter Test
+    /////////////////////////////////////////////////////////////////////////
+
+    @Test
+    public void isAfterTest() {
+        assertTrue(time20190901.isAfter(time20190330));
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    ////  getTimeStr Test
+    /////////////////////////////////////////////////////////////////////////
+
+    @Test
+    public void getTimeStrTest() {
+        assertEquals("03/30/2019 @ 23:33", CalendarWrapper.getTimeStr(2019, 3, 30, 23, 33));
+        assertEquals("06/06/2016 @ 06:06", CalendarWrapper.getTimeStr(2016, 6, 6, 6, 6));
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    ////  now Test
+    /////////////////////////////////////////////////////////////////////////
+
+    @Test
+    public void nowTest() {
+        assertEquals(CalendarWrapper.now().getYear(), Calendar.getInstance().get(Calendar.YEAR));
+        assertEquals(CalendarWrapper.now().getMonth(), Calendar.getInstance().get(Calendar.MONTH) + 1);
+        assertEquals(CalendarWrapper.now().getDay(), Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    ////  clone Test
+    /////////////////////////////////////////////////////////////////////////
+
+    @Test
+    public void cloneTest() {
+        CalendarWrapper c2 = null;
+        try {
+            c2 = time20190330.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        assertNotNull(c2);
+        assertNotSame(c2, time20190330);
+        assertEquals(c2, time20190330);
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    ////  equals Test
+    /////////////////////////////////////////////////////////////////////////
+
+    @Test
+    public void equalsTest() {
+        CalendarWrapper c2 = new CalendarWrapper(2019,9,1,0,0);
+        assertEquals(c2, time20190901);
+        assertEquals(c2, c2);
+        assertNotEquals(c2, null);
+        assertNotEquals(c2, new Object());
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    ////  hashCode Test
+    /////////////////////////////////////////////////////////////////////////
+
+    @Test
+    public void hashCodeTest() {
+        CalendarWrapper c2 = new CalendarWrapper(2019,9,1,0,0);
+        assertEquals(c2.hashCode(), time20190901.hashCode());
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    ////  toString Test
+    /////////////////////////////////////////////////////////////////////////
+
+    @Test
+    public void toStringTest() {
+        assertEquals("CalendarWrapper (03/30/2019 @ 23:59)", time20190330.toString());
     }
 }
