@@ -111,6 +111,7 @@ public class Load extends Parser {
     @Override
     public synchronized boolean Ics() {
         // TODO
+        return false;
     }
 
     /**
