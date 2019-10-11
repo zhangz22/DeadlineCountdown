@@ -1,5 +1,10 @@
 package model;
 
+import javafx.util.Pair;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.Calendar;
 
 /**
@@ -30,7 +35,7 @@ import java.util.Calendar;
  * TODO
  */
 public final class Deadline implements DeadlineInterface {
-    private final Calendar date;
+    private final CalendarWrapper date;
     private final String deadlineName;
     private final String courseName;
 
@@ -43,7 +48,7 @@ public final class Deadline implements DeadlineInterface {
      * @modifies date, deadlineName, course
      * @effects create a new Deadline instance
      */
-    public Deadline(Calendar date_, String deadline_, String course_) {
+    public Deadline(CalendarWrapper date_, String deadline_, String course_) {
         this.date = date_;
         this.deadlineName = deadline_;
         this.courseName = course_;
@@ -59,7 +64,7 @@ public final class Deadline implements DeadlineInterface {
      */
     @Override
     public int getMinute() {
-        return 0; //TODO
+        return this.date.getMinuteOfHour();
     }
 
     /**
@@ -73,7 +78,7 @@ public final class Deadline implements DeadlineInterface {
      */
     @Override
     public int getHour() {
-        return 0; // TODO
+        return this.date.getHourOfDay();
     }
 
     /**
@@ -87,7 +92,7 @@ public final class Deadline implements DeadlineInterface {
      */
     @Override
     public int getDay() {
-        return 0; // TODO
+        return this.date.getDay();
     }
 
     /**
@@ -101,7 +106,7 @@ public final class Deadline implements DeadlineInterface {
      */
     @Override
     public int getMonth() {
-        return 0; // TODO
+        return this.date.getMonth();
     }
 
     /**
@@ -114,7 +119,7 @@ public final class Deadline implements DeadlineInterface {
      */
     @Override
     public int getYear() {
-        return 0; // TODO
+        return this.date.getYear();
     }
 
     /**
@@ -140,6 +145,62 @@ public final class Deadline implements DeadlineInterface {
     @Override
     public String getName() {
         return deadlineName;
+    }
+
+    /**
+     * Check if a deadline has already passed away
+     *
+     * @param d a date to be compared
+     * @return {@code true} if the current deadline is after date time d;
+     * {@code false} otherwise
+     * @requires None
+     * @modifies None
+     * @effects None
+     */
+    @Override
+    public boolean isAfter(CalendarWrapper d) {
+        return this.date.isAfter(d);
+    }
+
+    /**
+     * Check if a deadline has is due before a specified date time
+     *
+     * @param d a date to be compared
+     * @return {@code true} if the current deadline is before date time d;
+     * {@code false} otherwise
+     * @requires None
+     * @modifies None
+     * @effects None
+     */
+    @Override
+    public boolean isBefore(CalendarWrapper d) {
+        return !this.date.isAfter(d);
+    }
+
+    /**
+     * This function will return the remaining period of this deadline
+     *
+     * @param otherTime a date to be compared
+     * @return a pair of which the key is a Period object representing the remaining
+     * time and the value is a boolean representing if the deadline has passed away
+     * @requires None
+     * @modifies None
+     * @effects None
+     */
+    @Override
+    public Pair<Period, Boolean> getRemainPeriod(CalendarWrapper otherTime) {
+        if (otherTime == null) otherTime = CalendarWrapper.now();
+        // interval from start to end
+        LocalDate due = LocalDateTime.ofInstant(this.date.getCalendarInstance().toInstant(),
+                this.date.getCalendarInstance().getTimeZone().toZoneId()).toLocalDate();
+        LocalDate other = LocalDateTime.ofInstant(otherTime.getCalendarInstance().toInstant(),
+                otherTime.getCalendarInstance().getTimeZone().toZoneId()).toLocalDate();
+        if (otherTime.isAfter(this.date)) {
+            // deadline passed
+            return new Pair<>(Period.between(due, other), false);
+        } else {
+            return new Pair<>(Period.between(other, due), true);
+        }
     }
 
     /**

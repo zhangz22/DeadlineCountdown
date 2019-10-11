@@ -1,5 +1,9 @@
 package model;
 
+import javafx.util.Pair;
+
+import java.time.Period;
+
 /**
  * @overview
  * This class represents the interface of a Deadline object
@@ -79,6 +83,39 @@ public interface DeadlineInterface extends Cloneable {
      * @return the name of this deadline
      */
     String getName();
+
+    /**
+     * Check if a deadline has already passed away
+     * @param d a date to be compared
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return {@code true} if the current deadline is after date time d;
+     *         {@code false} otherwise
+     */
+    boolean isAfter(CalendarWrapper d);
+
+    /**
+     * Check if a deadline has is due before a specified date time
+     * @param d a date to be compared
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return {@code true} if the current deadline is before date time d;
+     *         {@code false} otherwise
+     */
+    boolean isBefore(CalendarWrapper d);
+
+    /**
+     * This function will return the remaining period of this deadline
+     * @param d a date to be compared
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return a pair of which the key is a Period object representing the remaining
+     *   time and the value is a boolean representing if the deadline has passed away
+     */
+    Pair<Period,Boolean> getRemainPeriod(CalendarWrapper d);
 
     /**
      * Creates and returns a copy of this object. The precise meaning

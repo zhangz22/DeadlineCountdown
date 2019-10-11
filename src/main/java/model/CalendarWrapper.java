@@ -125,6 +125,15 @@ public class CalendarWrapper implements Cloneable {
     }
 
     /**
+     * TODO javadoc for getCalendarInstance() needed
+     * @return
+     */
+    public Calendar getCalendarInstance() {
+        return (Calendar) this.cal.clone();
+    }
+
+
+    /**
      * This function returns the minute of the time cal is representing.
      *
      * @requires None
