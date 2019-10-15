@@ -86,6 +86,26 @@ public interface CourseInterface extends Cloneable {
     Map<String, Deadline> getDeadlines();
 
     /**
+     * This function will return a list of deadline names based on their dates,
+     * ascending order.
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return a list of deadline names based on their dates
+     */
+    List<String> getSortedDeadlines();
+
+    /**
+     * This function will return a list of deadline names based on their dates,
+     * descending order.
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return a list of deadline names based on their dates
+     */
+    List<String> getReversedSortedDeadlines();
+
+    /**
      * Creates and returns a copy of this object. The precise meaning
      * of "copy" may depend on the class of the object.      *
      * @return     a clone of this instance.

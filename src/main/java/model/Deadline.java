@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.Calendar;
+import java.util.Objects;
 
 /**
  * @overview
@@ -34,7 +35,7 @@ import java.util.Calendar;
  * @representation_invariant
  * TODO
  */
-public final class Deadline implements DeadlineInterface {
+public final class Deadline implements DeadlineInterface, Comparable<Deadline> {
     private final CalendarWrapper date;
     private final String deadlineName;
     private final String courseName;
@@ -202,6 +203,87 @@ public final class Deadline implements DeadlineInterface {
             return new Pair<>(Period.between(other, due), true);
         }
     }
+
+    /**
+     * Compares this object with the specified object for order.  Returns a
+     * negative integer, zero, or a positive integer as this object is less
+     * than, equal to, or greater than the specified object.
+     *
+     * @param o the object to be compared.
+     * @return a negative integer, zero, or a positive integer as this object
+     * is less than, equal to, or greater than the specified object.
+     * @throws NullPointerException if the specified object is null
+     * @throws ClassCastException   if the specified object's type prevents it
+     *                              from being compared to this object.
+     */
+    @Override
+    public int compareTo(Deadline o) {
+        // TODO compareTo testing needed
+        if (this.date.equals(o.date)) {
+            return 0;
+        }
+        if (!this.date.isAfter(o.date)) {
+            return 1;
+        }
+        return -1;
+    }
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     * The {@code equals} method implements an equivalence relation
+     * on non-null object references
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @param   o   the reference object with which to compare.
+     * @return  {@code true} if this object is the same as the obj
+     *          argument; {@code false} otherwise.
+     * @see     #hashCode()
+     * @see     java.util.HashMap
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Deadline deadline = (Deadline) o;
+        return Objects.equals(date, deadline.date) &&
+                Objects.equals(deadlineName, deadline.deadlineName) &&
+                Objects.equals(courseName, deadline.courseName);
+    }
+
+    /**
+     * Returns a hash code value for the object. This method is
+     * supported for the benefit of hash tables
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return  a hash code value for this object.
+     * @see     java.lang.Object#equals(java.lang.Object)
+     * @see     java.lang.System#identityHashCode
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(date, deadlineName, courseName);
+    }
+
+    /**
+     * Returns a string representation of the object.
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return  a string representation of the object.
+     */
+    @Override
+    public String toString() {
+        return deadlineName + " <" + courseName + "> (" +
+                CalendarWrapper.getTimeStr(getYear(),getMonth(), getDay(),
+                        this.getHour(), this.getMinute()) + ")";
+    }
+
 
     /**
      * Creates and returns a copy of this object. The precise meaning

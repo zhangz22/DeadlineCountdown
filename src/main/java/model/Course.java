@@ -150,6 +150,37 @@ public class Course implements CourseInterface {
     }
 
     /**
+     * This function will return a list of deadline names based on their dates,
+     * ascending order.
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return a list of deadline names based on their dates
+     */
+    @Override
+    public List<String> getSortedDeadlines() {
+        List<String> SortedDeadlineList = new ArrayList<>(deadlines.keySet());
+        SortedDeadlineList.sort(Comparator.comparing(o -> deadlines.get(o)));
+        return SortedDeadlineList;
+    }
+
+    /**
+     * This function will return a list of deadline names based on their dates,
+     * descending order.
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return a list of deadline names based on their dates
+     */
+    @Override
+    public List<String> getReversedSortedDeadlines() {
+        List<String> SortedDeadlineList = new ArrayList<>(deadlines.keySet());
+        SortedDeadlineList.sort((o1, o2) -> deadlines.get(o2).compareTo(deadlines.get(o1)));
+        return SortedDeadlineList;
+    }
+
+
+    /**
      * Indicates whether some other object is "equal to" this one.
      * The {@code equals} method implements an equivalence relation
      * on non-null object references
