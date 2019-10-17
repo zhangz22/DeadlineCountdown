@@ -2,6 +2,7 @@ package model;
 
 import javafx.util.Pair;
 
+import java.time.Duration;
 import java.time.Period;
 
 /**
@@ -115,7 +116,7 @@ public interface DeadlineInterface extends Cloneable {
      * @return a pair of which the key is a Period object representing the remaining
      *   time and the value is a boolean representing if the deadline has passed away
      */
-    Pair<Period,Boolean> getRemainPeriod(CalendarWrapper d);
+    Pair<Duration,Boolean> getRemainPeriod(CalendarWrapper d);
 
     /**
      * Creates and returns a copy of this object. The precise meaning

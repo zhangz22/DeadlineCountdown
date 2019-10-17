@@ -2,6 +2,7 @@ package model;
 
 import javafx.util.Pair;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -43,16 +44,36 @@ public final class Deadline implements DeadlineInterface, Comparable<Deadline> {
     /**
      * Basic constructor for Deadline Object
      * @param date_ a Calendar object which represents a deadline time
-     * @param deadline_ the name of a deadline
+     * @param name_ the name of a deadline
      * @param course_ the name of the course
      * @requires date_ != null, name_ != null, course_ != null
      * @modifies date, deadlineName, course
      * @effects create a new Deadline instance
      */
-    public Deadline(CalendarWrapper date_, String deadline_, String course_) {
+    public Deadline(CalendarWrapper date_, String name_, String course_) {
         this.date = date_;
-        this.deadlineName = deadline_;
+        this.deadlineName = name_;
         this.courseName = course_;
+    }
+
+    /**
+     * Basic constructor for Deadline Object
+     * @param year the year number
+     * @param month the month number of a year, starts from 1 (Jan)
+     * @param day the day number of a month
+     * @param hour the hour number of a day
+     * @param minute the minute number of an hour
+     * @param name_ the name of a deadline
+     * @param course_ the name of the course
+     * @requires name_ != null, course_ != null
+     * @modifies date, name, course
+     * @effects create a new Deadline instance
+     * @throws CalendarWrapper.CalendarFormatException if the number of date is invalid
+     */
+    public Deadline(int year, int month, int day, int hour,
+                             int minute, String name_, String course_)
+            throws CalendarWrapper.CalendarFormatException {
+        this(new CalendarWrapper(year, month, day ,hour, minute), name_, course_);
     }
 
     /**
@@ -189,7 +210,7 @@ public final class Deadline implements DeadlineInterface, Comparable<Deadline> {
      * @effects None
      */
     @Override
-    public Pair<Period, Boolean> getRemainPeriod(CalendarWrapper otherTime) {
+    public Pair<Duration, Boolean> getRemainPeriod(CalendarWrapper otherTime) {
         if (otherTime == null) otherTime = CalendarWrapper.now();
         // interval from start to end
         LocalDate due = LocalDateTime.ofInstant(this.date.getCalendarInstance().toInstant(),
@@ -198,9 +219,9 @@ public final class Deadline implements DeadlineInterface, Comparable<Deadline> {
                 otherTime.getCalendarInstance().getTimeZone().toZoneId()).toLocalDate();
         if (otherTime.isAfter(this.date)) {
             // deadline passed
-            return new Pair<>(Period.between(due, other), false);
+            return new Pair<>(Duration.between(due, other), false);
         } else {
-            return new Pair<>(Period.between(other, due), true);
+            return new Pair<>(Duration.between(other, due), true);
         }
     }
 

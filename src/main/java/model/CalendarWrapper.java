@@ -16,6 +16,29 @@ import java.util.Objects;
 public class CalendarWrapper implements Cloneable {
     /** cal: A Java Calendar instance containing current time.  */
     private Calendar cal;
+    /**
+     * Value of the month field indicating the months of the year.
+     */
+    public final static int JANUARY = 1;
+    public final static int FEBRUARY = 2;
+    public final static int MARCH = 3;
+    public final static int APRIL = 4;
+    public final static int MAY = 5;
+    public final static int JUNE = 6;
+    public final static int JULY = 7;
+    public final static int AUGUST = 8;
+    public final static int SEPTEMBER = 9;
+    public final static int OCTOBER = 10;
+    public final static int NOVEMBER = 11;
+    public final static int DECEMBER = 12;
+    /**
+     * A runtime exception when the calendar value is out of range
+     */
+    public final static class CalendarFormatException extends RuntimeException {
+        CalendarFormatException(String e) {
+            super(e);
+        }
+    }
 
     /**
      * The basic constructor.
@@ -39,9 +62,11 @@ public class CalendarWrapper implements Cloneable {
      * @param minute       the minute number
      * @modifies this.cal
      * @effects create a new CalendarWrapper instance
+     * @throws CalendarFormatException if the number of date is invalid
      */
     public CalendarWrapper(final int year, final int month, final int day,
-                           final int hour, final int minute) {
+                           final int hour, final int minute)
+            throws CalendarFormatException {
         this.cal = new GregorianCalendar();
         this.setYear(year);
         this.setMonth(month);
@@ -58,10 +83,11 @@ public class CalendarWrapper implements Cloneable {
      * @requires None
      * @modifies cal
      * @effects update the minute
+     * @throws CalendarFormatException if the number of minute is smaller than 0 or larger than 59
      */
-    public void setMinute(int minute) {
+    public void setMinute(int minute) throws CalendarFormatException {
         if (minute < 0 || minute > 59) {
-            throw new RuntimeException("Error: \"minute\" should be in range [0,59]");
+            throw new CalendarFormatException("Error: \"minute\" should be in range [0,59]");
         }
         this.cal.set(Calendar.MINUTE, minute);
     }
@@ -74,10 +100,11 @@ public class CalendarWrapper implements Cloneable {
      * @requires None
      * @modifies cal
      * @effects update the hour
+     * @throws CalendarFormatException if the number of hour is smaller than 0 or larger than 59
      */
-    public void setHour(int hour) {
+    public void setHour(int hour) throws CalendarFormatException {
         if (hour < 0 || hour > 59) {
-            throw new RuntimeException("Error: \"hour\" should be in range [0,59]");
+            throw new CalendarFormatException("Error: \"hour\" should be in range [0,59]");
         }
         this.cal.set(Calendar.HOUR_OF_DAY, hour);
     }
@@ -89,10 +116,11 @@ public class CalendarWrapper implements Cloneable {
      * @requires None
      * @modifies cal
      * @effects update the date
+     * @throws CalendarFormatException if the number of day is smaller than 1 or larger than 31
      */
-    public void setDay(int day) {
+    public void setDay(int day) throws CalendarFormatException {
         if (day < 1 || day > 31) {
-            throw new RuntimeException("Error: \"day\" should be in range [1,31]");
+            throw new CalendarFormatException("Error: \"day\" should be in range [1,31]");
         }
         this.cal.set(Calendar.DATE, day);
     }
@@ -104,10 +132,11 @@ public class CalendarWrapper implements Cloneable {
      * @requires None
      * @modifies cal
      * @effects update the month
+     * @throws CalendarFormatException if the number of month is smaller than 1 or larger than 12
      */
-    public void setMonth(int month) {
+    public void setMonth(int month) throws CalendarFormatException {
         if (month < 1 || month > 12) {
-            throw new RuntimeException("Error: \"month\" should be in range [1,12]");
+            throw new CalendarFormatException("Error: \"month\" should be in range [1,12]");
         }
         this.cal.set(Calendar.MONTH, month-1);
     }

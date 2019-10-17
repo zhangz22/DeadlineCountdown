@@ -32,7 +32,7 @@ public class CalendarWrapperTest {
         time20190901.setDay(1);
         time20190901.setHour(0);
         time20190901.setMinute(0);
-        time20190330 = new CalendarWrapper(2019,3,30,23,59);
+        time20190330 = new CalendarWrapper(2019,CalendarWrapper.MARCH,30,23,59);
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -47,7 +47,7 @@ public class CalendarWrapperTest {
 
     @Test
     public void testCtorArgs() {
-        CalendarWrapper c2 = new CalendarWrapper(2019,3,30,23,33);
+        CalendarWrapper c2 = new CalendarWrapper(2019,CalendarWrapper.MARCH,30,23,33);
         assertNotNull(c2);
     }
 
@@ -213,7 +213,7 @@ public class CalendarWrapperTest {
 
     @Test
     public void equalsTest() {
-        CalendarWrapper c2 = new CalendarWrapper(2019,9,1,0,0);
+        CalendarWrapper c2 = new CalendarWrapper(2019,CalendarWrapper.SEPTEMBER,1,0,0);
         assertEquals(c2, time20190901);
         assertEquals(c2, c2);
         assertNotEquals(c2, null);
@@ -226,7 +226,7 @@ public class CalendarWrapperTest {
 
     @Test
     public void hashCodeTest() {
-        CalendarWrapper c2 = new CalendarWrapper(2019,9,1,0,0);
+        CalendarWrapper c2 = new CalendarWrapper(2019,CalendarWrapper.SEPTEMBER,1,0,0);
         assertEquals(c2.hashCode(), time20190901.hashCode());
     }
 
