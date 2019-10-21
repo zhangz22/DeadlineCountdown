@@ -73,6 +73,8 @@ public class CalendarWrapper implements Cloneable {
         this.setDay(day);
         this.setHour(hour);
         this.setMinute(minute);
+        this.cal.set(Calendar.SECOND, 0);
+        this.cal.set(Calendar.MILLISECOND, 0);
     }
 
     /**
@@ -87,7 +89,7 @@ public class CalendarWrapper implements Cloneable {
      */
     public void setMinute(int minute) throws CalendarFormatException {
         if (minute < 0 || minute > 59) {
-            throw new CalendarFormatException("Error: \"minute\" should be in range [0,59]");
+            throw new CalendarFormatException("Error: \"minute\"(" + minute +")  should be in range [0,59]");
         }
         this.cal.set(Calendar.MINUTE, minute);
     }
@@ -103,8 +105,8 @@ public class CalendarWrapper implements Cloneable {
      * @throws CalendarFormatException if the number of hour is smaller than 0 or larger than 59
      */
     public void setHour(int hour) throws CalendarFormatException {
-        if (hour < 0 || hour > 59) {
-            throw new CalendarFormatException("Error: \"hour\" should be in range [0,59]");
+        if (hour < 0 || hour > 23) {
+            throw new CalendarFormatException("Error: \"hour\"(" + hour +")  should be in range [0,23]");
         }
         this.cal.set(Calendar.HOUR_OF_DAY, hour);
     }
@@ -120,7 +122,7 @@ public class CalendarWrapper implements Cloneable {
      */
     public void setDay(int day) throws CalendarFormatException {
         if (day < 1 || day > 31) {
-            throw new CalendarFormatException("Error: \"day\" should be in range [1,31]");
+            throw new CalendarFormatException("Error: \"day\"(" + day +")  should be in range [1,31]");
         }
         this.cal.set(Calendar.DATE, day);
     }
@@ -136,7 +138,7 @@ public class CalendarWrapper implements Cloneable {
      */
     public void setMonth(int month) throws CalendarFormatException {
         if (month < 1 || month > 12) {
-            throw new CalendarFormatException("Error: \"month\" should be in range [1,12]");
+            throw new CalendarFormatException("Error: \"month\"(" + month +") should be in range [1,12]");
         }
         this.cal.set(Calendar.MONTH, month-1);
     }

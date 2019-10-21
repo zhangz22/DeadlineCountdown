@@ -1,9 +1,9 @@
 package model;
 
 import javafx.util.Pair;
+import org.joda.time.DateTime;
+import org.joda.time.Period;
 
-import java.time.Duration;
-import java.time.Period;
 
 /**
  * @overview
@@ -116,7 +116,17 @@ public interface DeadlineInterface extends Cloneable {
      * @return a pair of which the key is a Period object representing the remaining
      *   time and the value is a boolean representing if the deadline has passed away
      */
-    Pair<Duration,Boolean> getRemainPeriod(CalendarWrapper d);
+    Pair<Period,Boolean> getRemainPeriod(CalendarWrapper d);
+
+    /**
+     * This function will return a text of the remaining time
+     * @param currentTime a date to be compared
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return a String representing the remaining time
+     */
+    String getRemainingText(CalendarWrapper currentTime);
 
     /**
      * Creates and returns a copy of this object. The precise meaning

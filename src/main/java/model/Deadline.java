@@ -2,12 +2,12 @@ package model;
 
 import javafx.util.Pair;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.Calendar;
 import java.util.Objects;
+
+import org.joda.time.DateTime;
+import org.joda.time.Interval;
+import org.joda.time.Period;
 
 /**
  * @overview
@@ -210,20 +210,91 @@ public final class Deadline implements DeadlineInterface, Comparable<Deadline> {
      * @effects None
      */
     @Override
-    public Pair<Duration, Boolean> getRemainPeriod(CalendarWrapper otherTime) {
+    public Pair<Period, Boolean> getRemainPeriod(CalendarWrapper otherTime) {
         if (otherTime == null) otherTime = CalendarWrapper.now();
         // interval from start to end
-        LocalDate due = LocalDateTime.ofInstant(this.date.getCalendarInstance().toInstant(),
-                this.date.getCalendarInstance().getTimeZone().toZoneId()).toLocalDate();
-        LocalDate other = LocalDateTime.ofInstant(otherTime.getCalendarInstance().toInstant(),
-                otherTime.getCalendarInstance().getTimeZone().toZoneId()).toLocalDate();
         if (otherTime.isAfter(this.date)) {
             // deadline passed
-            return new Pair<>(Duration.between(due, other), false);
+            Interval interval = new Interval(new DateTime(this.date.getCalendarInstance()),
+                    new DateTime(otherTime.getCalendarInstance()));
+            return new Pair<>(new Period(interval), false);
         } else {
-            return new Pair<>(Duration.between(other, due), true);
+            Interval interval = new Interval(new DateTime(otherTime.getCalendarInstance()),
+                    new DateTime(this.date.getCalendarInstance()));
+            return new Pair<>(new Period(interval), true);
         }
     }
+
+    /**
+     * This function will return a text of the remaining time
+     * @param otherTime a date to be compared
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return a String representing the remaining time
+     */
+    @Override
+    public String getRemainingText(CalendarWrapper otherTime) {
+        if (otherTime == null) otherTime = CalendarWrapper.now();
+        Pair<Period, Boolean> remain = this.getRemainPeriod(otherTime);
+        Period pd = remain.getKey();
+        String month;
+        if (pd.getMonths() > 0) {
+            month = String.format("%02d Months ", pd.getMonths());
+        } else {
+            month = "";
+        }
+        String remainingText = month + String.format("%02d Days %02d Hours %02d Minutes ",
+                pd.getWeeks()*7+pd.getDays(),pd.getHours(),pd.getMinutes());
+        if (remain.getValue().equals(true)) remainingText+="Left.";
+        else remainingText += "Ago.";
+        return remainingText;
+    }
+
+    /**
+     * This function will take a String which has a format as "(due MM/DD/YYYY @ HH:MM)"
+     * and return a Calendar object based on the time represented by the string
+     * @param dueText the time string
+     * @requires dueText != null
+     * @modifies None
+     * @effects parse the string and create a Calendar object
+     * @return a Calendar object based on the time represented by the string
+     * @throws RuntimeException TODO docs needed for throws
+     * @throws CalendarWrapper.CalendarFormatException TODO
+     */
+    public static CalendarWrapper parseDate(String dueText) throws RuntimeException, CalendarWrapper.CalendarFormatException {
+        int startLength = 0;
+        if (!(dueText.startsWith("(due ") || dueText.startsWith("(teams lock ")))
+            throw new RuntimeException(dueText + " is not a valid due text");
+        else {
+            if (dueText.startsWith("(due ")) {
+                startLength = 5;
+            } else if (dueText.startsWith("(teams lock ")) {
+                startLength = 12;
+            }
+        }
+        assert(startLength == 5 || startLength == 12);
+        String monthStr = dueText.substring(startLength,startLength+2);  // 5-7
+        String dayStr = dueText.substring(startLength+3,startLength+5); // 8-10
+        String yearStr = dueText.substring(startLength+6,startLength+10); // 11-15
+        String hourStr = dueText.substring(startLength+13,startLength+15); // 18-20
+        String minuteStr = dueText.substring(startLength+16,startLength+18); // 21,23
+        int year, month, day, hour, minute;
+        try {
+            year = Integer.parseInt(yearStr);
+            month = Integer.parseInt(monthStr);
+            day = Integer.parseInt(dayStr);
+            hour = Integer.parseInt(hourStr);
+            minute = Integer.parseInt(minuteStr);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException(dueText + " is not a valid due text");
+        }
+        if (!(month >= 0 && month <= 11)) {
+            throw new CalendarWrapper.CalendarFormatException(monthStr + " is not a valid month text");
+        }
+        return new CalendarWrapper(year, month, day, hour, minute);
+    }
+
 
     /**
      * Compares this object with the specified object for order.  Returns a
@@ -244,9 +315,9 @@ public final class Deadline implements DeadlineInterface, Comparable<Deadline> {
             return 0;
         }
         if (!this.date.isAfter(o.date)) {
-            return 1;
+            return -1;
         }
-        return -1;
+        return 1;
     }
 
     /**

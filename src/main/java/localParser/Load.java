@@ -1,7 +1,5 @@
 package localParser;
 
-import com.sun.istack.internal.NotNull;
-import model.Deadline;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
