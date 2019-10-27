@@ -105,6 +105,28 @@ public class Course implements CourseInterface {
     }
 
     /**
+     * This function will add a deadline to current course
+     * @param deadlineName the name of the deadline
+     * @param year the year number
+     * @param month the month number of a year, starts from 1 (Jan)
+     * @param day the day number of a month
+     * @param hour the hour number of a day
+     * @param minute the minute number of an hour
+     * @requires deadlineName != null
+     * @modifies Deadlines
+     * @effects add a new deadline object to the Deadlines map
+     * @throws CalendarWrapper.CalendarFormatException  of the number of date is invalid
+     */
+    @Override
+    public void addDeadline(String deadlineName, int year, int month,
+                            int day, int hour, int minute)
+            throws CalendarWrapper.CalendarFormatException  {
+        Deadline d = new Deadline(year, month, day, hour, minute, deadlineName,
+                this.courseName);
+        deadlines.put(deadlineName,d);
+    }
+
+    /**
      * This function will add all deadlines from another course object to current
      * course if they got the same course name
      *
