@@ -153,19 +153,6 @@ public class SubmittyAccess {
 
             // generate a course object
             Course currCourse = new Course(courseName.replace("Spring 2019", "").trim());
-            synchronized (this) {
-                if (currProgressLabel != null) {
-                    if (currProgressLabel instanceof JLabel) {
-                        String courseNameText = currCourse.getCourseName();
-                        if (courseNameText.startsWith("CSCI")) {
-                            courseNameText = courseNameText.replace(courseNameText.split(" ")[0], "").trim();
-                        }
-                        ((JLabel) currProgressLabel).setText("Analyzing " + courseNameText);
-                        ((JLabel) currProgressLabel).repaint();
-                    }
-                }
-            }
-
             // Get information about current course
             currCourseBtn.click();
             List<WebElement> DeadlineList = driver.findElements(By.className("btn-nav-submit"));

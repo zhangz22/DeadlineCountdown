@@ -292,6 +292,9 @@ public final class Deadline implements DeadlineInterface, Comparable<Deadline> {
         if (!(month >= 0 && month <= 11)) {
             throw new CalendarWrapper.CalendarFormatException(monthStr + " is not a valid month text");
         }
+        if (dueText.endsWith("PM)")) {
+            hour += 12;
+        }
         return new CalendarWrapper(year, month, day, hour, minute);
     }
 
