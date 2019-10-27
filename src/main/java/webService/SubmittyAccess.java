@@ -151,9 +151,6 @@ public class SubmittyAccess {
             String courseName = currCourseBtn.getText();
             System.err.println("DEBUG: [accessDriver] Parsing current course " + courseName);
 
-            // Skip useless courses
-            if (!courseName.startsWith("Spring 2019")) continue;
-
             // generate a course object
             Course currCourse = new Course(courseName.replace("Spring 2019", "").trim());
             synchronized (this) {
