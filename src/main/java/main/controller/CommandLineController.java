@@ -152,7 +152,12 @@ public class CommandLineController extends AbstractController implements Operati
         if (console == null) {
             final JPasswordField jpf = new JPasswordField();
             JOptionPane jop = new JOptionPane(jpf, JOptionPane.QUESTION_MESSAGE,
-                    JOptionPane.OK_CANCEL_OPTION);
+                    JOptionPane.OK_CANCEL_OPTION) {
+                @Override
+                public void selectInitialValue() {
+                    jpf.requestFocusInWindow();
+                }
+            };
             JDialog dialog = jop.createDialog("Enter the password: ");
             dialog.addComponentListener(new ComponentAdapter() {
                 @Override
@@ -173,6 +178,7 @@ public class CommandLineController extends AbstractController implements Operati
             } catch (NullPointerException e) {
                 exit(1);
             }
+
             char[] passwordArray = null;
             if (result == JOptionPane.OK_OPTION) {
                 passwordArray = jpf.getPassword();

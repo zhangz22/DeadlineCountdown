@@ -106,7 +106,7 @@ public class SubmittyAccess {
         }
 
         // And now use this to visit Submitty
-        driver.get("https://submitty.cs.rpi.edu/");
+        driver.get("https://submitty.cs.rpi.edu/home");
 
         // Find the text input element by its name
         WebElement IdElement = driver.findElement(By.name("user_id"));
