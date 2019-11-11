@@ -76,10 +76,7 @@ public class SubmittyAccess {
         // Notice that the remainder of the code relies on the interface,
         // not the implementation.
         final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:25.0) Gecko/20160101 Firefox/66.0";
-        driver = new SilentHtmlUnitDriver(new BrowserVersion(
-                "Firefox", "5.0 (Windows)",
-                USER_AGENT, 66
-        ));
+        driver = new SilentHtmlUnitDriver(BrowserVersion.FIREFOX_38);
         this.user_id = user_id;
         this.password = password;
         this.courseList = new ConcurrentHashMap<>();
