@@ -86,6 +86,25 @@ public interface DeadlineInterface extends Cloneable {
     String getName();
 
     /**
+     * This function returns the status of this deadline
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return the status
+     */
+    String getStatus();
+
+    /**
+     * This function returns the link of this deadline
+     *
+     * @return the link
+     * @requires None
+     * @modifies None
+     * @effects None
+     */
+    String getLink();
+
+    /**
      * Check if a deadline has already passed away
      * @param d a date to be compared
      * @requires None
