@@ -15,7 +15,7 @@ import java.util.Objects;
  * What's more, this class only needs to be accurate to second instead of millisecond
  * which java.util.Calendar is accurate to.
  */
-public class CalendarWrapper implements Cloneable {
+public class CalendarWrapper implements Cloneable, Comparable<CalendarWrapper>  {
     /** cal: A Java Calendar instance containing current time.  */
     private Calendar cal;
     /**
@@ -33,6 +33,7 @@ public class CalendarWrapper implements Cloneable {
     public final static int OCTOBER = 10;
     public final static int NOVEMBER = 11;
     public final static int DECEMBER = 12;
+
     /**
      * A runtime exception when the calendar value is out of range
      */
@@ -314,6 +315,29 @@ public class CalendarWrapper implements Cloneable {
      */
     public static CalendarWrapper now() {
         return new CalendarWrapper();
+    }
+
+    /**
+     * Compares this object with the specified object for order.  Returns a
+     * negative integer, zero, or a positive integer as this object is less
+     * than, equal to, or greater than the specified object.
+     *
+     * @param o the object to be compared.
+     * @return a negative integer, zero, or a positive integer as this object
+     * is less than, equal to, or greater than the specified object.
+     * @throws NullPointerException if the specified object is null
+     * @throws ClassCastException   if the specified object's type prevents it
+     *                              from being compared to this object.
+     */
+    @Override
+    public int compareTo(CalendarWrapper o) {
+        Calendar self = (Calendar) this.cal.clone();
+        Calendar other = (Calendar) this.cal.clone();
+        self.set(Calendar.SECOND, 0);
+        self.set(Calendar.MILLISECOND, 0);
+        other.set(Calendar.SECOND, 0);
+        other.set(Calendar.MILLISECOND, 0);
+        return self.compareTo(other);
     }
 
     /**

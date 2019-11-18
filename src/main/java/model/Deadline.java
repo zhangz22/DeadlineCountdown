@@ -233,6 +233,24 @@ public final class Deadline implements DeadlineInterface, Comparable<Deadline> {
     }
 
     /**
+     * This function returns the exact time of this deadline
+     *
+     * @return the date of this deadline
+     * @requires None
+     * @modifies None
+     * @effects None
+     */
+    @Override
+    public CalendarWrapper getTime() {
+        try {
+            return this.date.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
      * Check if a deadline has is due before a specified date time
      *
      * @param d a date to be compared

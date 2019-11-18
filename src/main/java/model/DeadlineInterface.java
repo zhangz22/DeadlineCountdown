@@ -116,6 +116,15 @@ public interface DeadlineInterface extends Cloneable {
     boolean isAfter(CalendarWrapper d);
 
     /**
+     * This function returns the exact time of this deadline
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return the date of this deadline
+     */
+    CalendarWrapper getTime();
+
+    /**
      * Check if a deadline has is due before a specified date time
      * @param d a date to be compared
      * @requires None
