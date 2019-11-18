@@ -1,6 +1,10 @@
 package localParser;
 
 import model.Course;
+import main.controller.AbstractController;
+import main.controller.GUIController;
+
+import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -11,7 +15,7 @@ public abstract class Parser {
     public static final String[] SUPPORTED_EXTIONSION = {"json", "txt", "csv", "ics"};
     public static final String[] SUPPORTED_EXTIONSION_DESCRIPTION =
             {"JavaScript Object Notation (*.json)",
-                    "Pure OneSecondFont (*.txt)",
+                    "Pure Text (*.txt)",
                     "Comma-Separated Values (*.csv)",
                     "Universal Calendar Format File (*.ics)"};
     protected static String errMsg = "";
@@ -51,12 +55,15 @@ public abstract class Parser {
      *
      * @param parser the parser type
      * @param extension the file extension
+     * @param parent the main process
+     * @param showDialog if the program should show a dialog indicator
      * @requires parser != null
      * @modifies None
      * @effects None
      * @return a new Java Thread
      */
-    public static Thread getParserThread(Parser parser, String extension) {
+    public static Thread getParserThread(Parser parser, String extension,
+                                         AbstractController parent, boolean showDialog) {
         return new Thread(() -> {
             boolean result = true;
             switch (extension.toUpperCase()) {
@@ -70,6 +77,19 @@ public abstract class Parser {
                 case "TXT":
                     result = parser.Csv();
                     break;
+            }
+            // alerts
+            if (parent instanceof GUIController) {
+                if (!result && showDialog) {
+                    String parserType = (parser instanceof Save) ?
+                            ((GUIController) parent).getFrame().getText("saving_to") :
+                            ((GUIController) parent).getFrame().getText("loading_from");
+                    ((GUIController) parent).notification(parserType,
+                            ((!(errMsg == null) && !errMsg.equals("")) ?
+                                    ((GUIController) parent).getFrame().getText("error_code")
+                                    : "") + " " + errMsg, "");
+
+                }
             }
         });
     }

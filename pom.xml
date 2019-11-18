@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>groupId</groupId>
-    <artifactId>OneSecond</artifactId>
+    <artifactId>DeadlineCountdown</artifactId>
     <version>1.0-SNAPSHOT</version>
     <!-- maven-compiler-plugin -->
       <build>

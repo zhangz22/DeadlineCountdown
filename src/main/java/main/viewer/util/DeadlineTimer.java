@@ -5,10 +5,9 @@ import model.Deadline;
 import main.controller.GUIController;
 import org.joda.time.Period;
 
-import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.util.LinkedList;
-
 
 /**
  * This class represents the timer tasks that sets for each deadline to send notifications
@@ -77,8 +76,10 @@ public class DeadlineTimer {
      */
     private void sendNotification() {
         String message = this.deadline.getCourse() + ": " + this.deadline.getName() + " " +
-                "Due in " + " " + this.deadline.getRemainingText(CalendarWrapper.now());
+                parent.getFrame().getText("due_in") + " " + parent.getFrame().getTextFormat().getRemainingText(this.deadline, null, false);
         System.out.println("DEBUG: [DeadlineTimer] " + message);
+        if (!parent.isIgnoring(this.deadline.getCourse()))
+            parent.notification(parent.getFrame().getText("notification_title_deadline_approach"), message,"");
     }
 
     /**
@@ -171,6 +172,7 @@ public class DeadlineTimer {
      * @return true if the timer should be set for the current deadline and false otherwise
      */
     private boolean shouldStop() {
-        return this.deadline.isBefore(CalendarWrapper.now());
+        return this.deadline.isBefore(CalendarWrapper.now()) ||
+                this.parent.isIgnoring(this.deadline.getCourse());
     }
 }

@@ -1,16 +1,30 @@
 package main.viewer.util;
 
 import main.controller.GUIController;
+import main.viewer.mainFactory;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 
 /**
- * This component is created represent the login dialog of oneSecond
+ * This component is created represent the login dialog of main
  */
 public class LoginDialog extends JDialog {
     private GridBagConstraints constraint;
@@ -22,7 +36,7 @@ public class LoginDialog extends JDialog {
 
     /**
      * Constructor
-     * @param parent the oneSecond main component
+     * @param parent the main main component
      * @param message the additional message
      * @param lastID the last saved id
      * @requires None
@@ -30,7 +44,7 @@ public class LoginDialog extends JDialog {
      * @effects create a new LoginDialog
      */
     public LoginDialog(GUIController parent, String message, String lastID) {
-        // super(parent.getFrame(), "", true);
+        super(parent.getFrame(), "", true);
 
         // initialize the variables
         this.id = null;
@@ -40,7 +54,7 @@ public class LoginDialog extends JDialog {
         this.constraint.fill = GridBagConstraints.HORIZONTAL;
 
         // A message that tells the user what to do
-        JTextArea hint = new JTextArea("LOGIN");
+        JTextArea hint = new JTextArea(parent.getFrame().getText("login_label"));
         hint.setBackground(null);
         hint.setOpaque(false);
         hint.setForeground(new Color(102,102,102));
@@ -49,9 +63,12 @@ public class LoginDialog extends JDialog {
         hint.setMargin(new Insets(3, 0, 3, 0));
         this.add(hint, 0,0,3);
 
+        // gap between the id part and the username part
+        JPanel sep = mainFactory.createEmptyArea(4, true);
+        this.add(sep, 0,1,3);
 
         // ask for username
-        JLabel usernameLabel = new JLabel("username: ");
+        JLabel usernameLabel = new JLabel(parent.getFrame().getText("username") +  ": ");
         this.add(usernameLabel, 0, 2,1);
 
         this.usernameField = new JTextField(20);
@@ -60,9 +77,11 @@ public class LoginDialog extends JDialog {
         }
         this.add(this.usernameField, 1,2,3);
 
+        JPanel sep2 = mainFactory.createEmptyArea(4, true);
+        this.add(sep2, 0,3,3);
 
         // ask for password
-        JLabel passwordLabel = new JLabel("password: ");
+        JLabel passwordLabel = new JLabel(parent.getFrame().getText("password") +  ": ");
         this.add(passwordLabel, 0,4,1);
 
         this.passwordField = new JPasswordField(20);
@@ -82,14 +101,14 @@ public class LoginDialog extends JDialog {
         }
 
         // Buttons
-        JButton confirmBtn = new JButton("login");
+        JButton confirmBtn = new JButton(parent.getFrame().getText("login"));
         confirmBtn.addActionListener(e -> {
             id = usernameField.getText().trim();
             password = new String(passwordField.getPassword());
             dispose();
         });
 
-        JButton cancelBtn= new JButton("cancel");
+        JButton cancelBtn= new JButton(parent.getFrame().getText("cancel"));
         cancelBtn.addActionListener(e -> {
             id = null;
             password = null;
@@ -128,6 +147,7 @@ public class LoginDialog extends JDialog {
         // set visible
         this.pack();
         this.setResizable(false);
+        this.setLocationRelativeTo(parent.getFrame());
     }
 
     /**

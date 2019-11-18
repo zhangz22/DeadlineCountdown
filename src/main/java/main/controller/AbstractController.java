@@ -4,11 +4,14 @@ import model.CalendarWrapper;
 import model.Course;
 import model.Deadline;
 
-import java.util.*;
+import java.util.List;
+import java.util.HashSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * This class defines a general controller.
+ * This class defines a general main controller.
  */
 public abstract class AbstractController implements Operations {
     /** allCourses: a map to store every course object with its name. */

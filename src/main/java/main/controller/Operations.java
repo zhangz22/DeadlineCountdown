@@ -53,14 +53,12 @@ public interface Operations {
      * @param day the day number; starts from 1 to 31
      * @param hour the hour number
      * @param minute the minute number
-     * @param status the status of this deadline
-     * @param link the link to the project
      * @requires None
      * @modifies a list that stores every course and their information
      * @effects None
      */
     void addDeadline(String course, String deadlineName, int year, int month,
-                            int day, int hour, int minute, String status, String link);
+                            int day, int hour, int minute);
 
     /**
      * This method would remove a deadline from an existing course.

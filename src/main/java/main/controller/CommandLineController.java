@@ -244,16 +244,14 @@ public class CommandLineController extends AbstractController implements Operati
      * @param day the day number; starts from 1 to 31
      * @param hour the hour number
      * @param minute the minute number
-     * @param status the status of this deadline
-     * @param link the link to the project
      * @requires None
      * @modifies a list that stores every course and their information
      * @effects None
-     * @throws CalendarWrapper.CalendarFormatException 
+     * @throws CalendarWrapper.CalendarFormatException
      */
     @Override
     public void addDeadline(String course, String deadlineName, int year, int month,
-                            int day, int hour, int minute, String status, String link) {
+                            int day, int hour, int minute) {
         Course c = getCourseByName(course);
         try {
             c.addDeadline(deadlineName, year, month, day, hour, minute);

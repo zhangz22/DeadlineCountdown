@@ -1,5 +1,7 @@
 package model;
 
+import org.joda.time.DateTime;
+
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Objects;
@@ -235,6 +237,32 @@ public class CalendarWrapper implements Cloneable {
      */
     public int getYear() {
         return this.cal.get(Calendar.YEAR);
+    }
+
+    /**
+     * This function returns the number of days in the month cal is representing
+     *
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return a number represents the number of days in current month
+     */
+    public int getMaxDayNumOfMonth() {
+        return this.cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+    }
+
+    /**
+     * This function returns the week day of the first day in the month cal is representing
+     *
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return a number represents the week day of the first day in current month
+     */
+    public int getWeekDayOfFirstDayInMonth() {
+        Calendar cal2 = (Calendar) this.cal.clone();
+        cal2.set(Calendar.DAY_OF_MONTH, 1);
+        return cal2.get(Calendar.DAY_OF_WEEK) - 1;
     }
 
     /**

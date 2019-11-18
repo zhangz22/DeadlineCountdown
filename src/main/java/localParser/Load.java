@@ -1,17 +1,18 @@
 package localParser;
 
+import com.sun.istack.internal.NotNull;
+import main.controller.AbstractController;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import java.io.*;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 /**
  * This class loads data from local files
  */
 public class Load extends Parser {
+    private AbstractController parent;
     private Reader reader;
 
     /**
@@ -22,7 +23,8 @@ public class Load extends Parser {
      * @modifies this.allCourses
      * @effects create a LocalParser.Load object
      */
-    public Load(Reader file) {
+    public Load(@NotNull AbstractController parent, Reader file) {
+        this.parent = parent;
         this.reader = file;
     }
 
@@ -54,7 +56,6 @@ public class Load extends Parser {
             for (Map.Entry<String, JsonElement> deadline : course.getValue().getAsJsonObject().entrySet()) {
                 String deadlineName = deadline.getKey();
                 Integer year = null, month = null, date = null, hour = null, minute = null;
-                String status = null, link = "";
                 for (Map.Entry<String, JsonElement> entry : deadline.getValue().getAsJsonObject().entrySet()) {
                     switch (entry.getKey()) {
                         case "year":
@@ -73,18 +74,12 @@ public class Load extends Parser {
                         case "minute":
                             minute = entry.getValue().getAsInt();
                             break;
-                        case "status":
-                            status = entry.getValue().getAsString();
-                            break;
-                        case "link":
-                            link = entry.getValue().getAsString();
-                            break;
                     }
                 }
                 if (year == null || month == null || date == null || hour == null || minute == null) {
                     errMsg = "Unrecognizable file format on line " + i;
                 } else {
-                    // TODO add deadline
+                    parent.addDeadline(courseName, deadlineName, year, month, date, hour, minute);
                     success = true;
                 }
                 i++;
@@ -93,7 +88,7 @@ public class Load extends Parser {
         try {
             this.reader.close();
         } catch (IOException e) {
-            // Error msg
+            System.err.println("[Load] Error when closing file" + e);
         }
         return success;
     }
@@ -107,9 +102,10 @@ public class Load extends Parser {
      * @return result: true -> successful; false -> failed
      */
     @Override
+    @SuppressWarnings("deprecation")
     public synchronized boolean Ics() {
-        // TODO
-        return false;
+        // TODO Feature in the future
+        return true;
     }
 
     /**
@@ -122,57 +118,7 @@ public class Load extends Parser {
      */
     @Override
     public synchronized boolean Csv() {
-        if (this.reader == null) {
-            return false;
-        }
-        BufferedReader reader = new BufferedReader(this.reader);
-        String str;
-        int i = 0;
-        while (true) {
-            try {
-                str = reader.readLine();
-            } catch (IOException e) {
-                e.printStackTrace();
-                errMsg = e.getMessage();
-                return false;
-            }
-            if (i == 0) {
-                // skip the first line
-                i++;
-                continue;
-            }
-            if (str != null) {
-                String[] parts = str.split(",");
-                if (parts.length < 7) {
-                    continue;
-                }
-                try {
-                    String courseName = parts[0];
-                    String deadlineName = parts[1];
-                    int year = Integer.parseInt(parts[4]);
-                    int month = Integer.parseInt(parts[2]);
-                    int date = Integer.parseInt(parts[3]);
-                    int hour = Integer.parseInt(parts[5]);
-                    int minute = Integer.parseInt(parts[6]);
-                    String status = parts[7];
-                    String link = "";
-                    if (parts.length == 9) {
-                        link = parts[8];
-                    }
-                    // TODO add deadline
-                } catch (NumberFormatException | IndexOutOfBoundsException e) {
-                    // Error
-                }
-            } else {
-                break;
-            }
-        }
-
-        try {
-            this.reader.close();
-        } catch (IOException e) {
-            // Error
-        }
+        // TODO Feature in the future
         return true;
     }
 }
