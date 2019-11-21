@@ -4,6 +4,7 @@ import com.sun.istack.internal.NotNull;
 import main.controller.AbstractController;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import model.Deadline;
 
 import java.io.*;
 import java.util.Map;
@@ -56,6 +57,7 @@ public class Load extends Parser {
             for (Map.Entry<String, JsonElement> deadline : course.getValue().getAsJsonObject().entrySet()) {
                 String deadlineName = deadline.getKey();
                 Integer year = null, month = null, date = null, hour = null, minute = null;
+                String status = null, link = "";
                 for (Map.Entry<String, JsonElement> entry : deadline.getValue().getAsJsonObject().entrySet()) {
                     switch (entry.getKey()) {
                         case "year":
@@ -74,12 +76,18 @@ public class Load extends Parser {
                         case "minute":
                             minute = entry.getValue().getAsInt();
                             break;
+                        case "status":
+                            status = entry.getValue().getAsString();
+                            break;
+                        case "link":
+                            link = entry.getValue().getAsString();
+                            break;
                     }
                 }
                 if (year == null || month == null || date == null || hour == null || minute == null) {
                     errMsg = "Unrecognizable file format on line " + i;
                 } else {
-                    parent.addDeadline(courseName, deadlineName, year, month, date, hour, minute);
+                    parent.addDeadline(courseName, deadlineName, year, month, date, hour, minute, status, link); // TODO status and link
                     success = true;
                 }
                 i++;
@@ -102,10 +110,8 @@ public class Load extends Parser {
      * @return result: true -> successful; false -> failed
      */
     @Override
-    @SuppressWarnings("deprecation")
     public synchronized boolean Ics() {
-        // TODO Feature in the future
-        return true;
+        throw new RuntimeException("Method not supported");
     }
 
     /**
@@ -118,7 +124,6 @@ public class Load extends Parser {
      */
     @Override
     public synchronized boolean Csv() {
-        // TODO Feature in the future
-        return true;
+        throw new RuntimeException("Method not supported");
     }
 }

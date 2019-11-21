@@ -18,7 +18,7 @@ public abstract class Parser {
                     "Pure Text (*.txt)",
                     "Comma-Separated Values (*.csv)",
                     "Universal Calendar Format File (*.ics)"};
-    protected static String errMsg = "";
+    static String errMsg = "";
 
     /**
      * This method would save data to a local JSON file.

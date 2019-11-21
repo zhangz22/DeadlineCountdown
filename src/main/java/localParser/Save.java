@@ -52,6 +52,14 @@ public class Save extends Parser {
                 writer.println("\t\t\t\"day\": " + deadlines.get(deadlineName).getDay() + ",");
                 writer.println("\t\t\t\"hour\": " + deadlines.get(deadlineName).getHour() + ",");
                 writer.print("\t\t\t\"minute\": " + deadlines.get(deadlineName).getMinute());
+                if (deadlines.get(deadlineName).getStatus() != null) {
+                    writer.println(",");
+                    writer.print("\t\t\t\"status\": \"" + deadlines.get(deadlineName).getStatus() + "\"");
+                }
+                if (!deadlines.get(deadlineName).getLink().equals("")) {
+                    writer.println(",");
+                    writer.print("\t\t\t\"link\": \"" + deadlines.get(deadlineName).getLink() + "\"");
+                }
                 writer.println();
                 if (deadlineCount != deadlines.size() - 1) {
                     writer.println("\t\t},");
@@ -82,7 +90,7 @@ public class Save extends Parser {
     @Override
     public synchronized boolean Ics() {
         // TODO feature in the future
-        return true;
+        throw new RuntimeException("Method not supported");
     }
 
     /**
@@ -95,6 +103,6 @@ public class Save extends Parser {
     @Override
     public synchronized boolean Csv() {
         // TODO feature in the future
-        return true;
+        throw new RuntimeException("Method not supported");
     }
 }
