@@ -1,5 +1,7 @@
 package main.viewer.calendarPanel;
 
+import main.viewer.textFormat.ViewerFont;
+
 import javax.swing.JButton;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
@@ -35,6 +37,7 @@ public class TitleButton extends JButton {
         setBackground(backgroundColor);
         setBorderPainted(false);
         setFocusPainted(false);
+        setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 22));
         setForeground(textColor);
         addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {

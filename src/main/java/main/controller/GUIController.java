@@ -1,13 +1,17 @@
 package main.controller;
 
-import main.viewer.GUIViewer;
-import main.viewer.util.DeadlineTimer;
-import main.viewer.util.LoadingDialog;
+import model.CalendarWrapper;
 import model.Course;
 import model.Deadline;
+import main.viewer.Log;
+import main.viewer.textFormat.ViewerFont;
+import main.viewer.util.DeadlineTimer;
+import main.viewer.GUIViewer;
+import main.viewer.util.LoadingDialog;
 import webService.SubmittyAccess;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.io.*;
 import java.util.HashSet;
 import java.util.Locale;
@@ -17,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.*;
 
+import static main.viewer.Log.*;
 
 /**
  * This class is the main controller of GUI version of main
@@ -24,6 +29,7 @@ import javax.swing.*;
 public class GUIController extends AbstractController implements Operations {
     public static final String VERSION = "1.0";
     private GUIViewer frame;
+    private Settings settings;
     private String settingPath;
 
     /**
@@ -39,15 +45,17 @@ public class GUIController extends AbstractController implements Operations {
         this.allCourses = new ConcurrentHashMap<>();
         this.allDeadlines = new TreeSet<>();
         this.ignoredCoursesSet = new HashSet<>();
+        // load basic settings
+        this.settings = new Settings();
         // create folders to store local data
         boolean folderResult = true;
         if (System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH).contains("win")) {
             // Windows
-            this.settingPath = System.getenv("APPDATA") + "/main/";
+            this.settingPath = System.getenv("APPDATA") + "/DeadlineCountdown/";
             File file = new File(this.settingPath);
             if (!file.exists()) {
                 folderResult = file.mkdirs();
-                System.out.println("DEBUG: [creating folder] folder [" + this.settingPath + "] create result " + folderResult);
+                Log.debug("DEBUG: [creating folder] folder [" + this.settingPath + "] create result " + folderResult);
             }
         } else if (System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH).contains("mac")) {
             // macOS
@@ -55,12 +63,21 @@ public class GUIController extends AbstractController implements Operations {
             File file = new File(this.settingPath);
             if (!file.exists()) {
                 folderResult = file.mkdirs();
-                System.out.println("DEBUG: [creating folder] folder [" + this.settingPath + "] create result " + folderResult);
+                Log.debug("DEBUG: [creating folder] folder [" + this.settingPath + "] create result " + folderResult);
             }
         }
         else {
             this.settingPath = "./";
         }
+        // check permission
+        if (!folderResult) {
+            this.settings.put(Settings.SUPPORTED.SAVE_LOCAL_FILE, false);
+            Log.error("Error when creating directory \"" + "\": access denied.");
+            this.notification("Access denied","Error when creating directory \"" + "\"","");
+        } else {
+            this.settings.put(Settings.SUPPORTED.SAVE_LOCAL_FILE, true);
+        }
+        this.loadSettings(false);
     }
 
     /**
@@ -123,6 +140,7 @@ public class GUIController extends AbstractController implements Operations {
      */
     public void alert(String message) {
         JLabel label = new JLabel(message);
+        label.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 16));
         JOptionPane.showConfirmDialog(frame, label, "", JOptionPane.DEFAULT_OPTION,
                 JOptionPane.PLAIN_MESSAGE);
     }
@@ -154,6 +172,68 @@ public class GUIController extends AbstractController implements Operations {
     }
 
     /**
+     * This function returns the settings of main
+     *
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return a copy of the current settings
+     */
+    public Settings getSettings() {
+        return new Settings(this.settings);
+    }
+
+    /**
+     * This function changes the settings of main
+     *
+     * @param key key for the setting item
+     * @param value value for the setting item
+     * @requires None
+     * @modifies settings
+     * @effects change the settings
+     */
+    public void setSettings(String key, boolean value) {
+        this.settings.put(key, value);
+    }
+
+    /**
+     * This function resets the settings of main
+     *
+     * @requires None
+     * @modifies settings
+     * @effects reset the settings
+     */
+    public void resetSettings() {
+        this.settings.setDefaultSettings();
+    }
+
+    /**
+     * This function changes the language of main
+     *
+     * @param language the locale for new language
+     * @param alert whether the program shows alert to the user
+     * @requires None
+     * @modifies settings
+     * @effects change the language
+     */
+    public void setLanguage(String language, boolean alert) {
+        this.settings.setLanguage(language, this, alert);
+    }
+
+    /**
+     * This function changes the theme for the program
+     *
+     * @param theme the new theme set for the program
+     * @param mainColor the main theme color
+     * @requires None
+     * @modifies this.theme
+     * @effects change the theme
+     */
+    public void setTheme(String theme, Color mainColor) {
+        this.settings.setTheme(theme, this, mainColor);
+    }
+
+    /**
      * This function starts or stops all timers
      * @param start if the timers will be started
      * @modifies this.getFrame().getAllTimersMap()
@@ -166,6 +246,117 @@ public class GUIController extends AbstractController implements Operations {
             } else {
                 timer.stop();
             }
+        }
+    }
+
+    /**
+     * This method would read settings from a previous saved local file.
+     *
+     * @param showDialog if the program should show a dialog indicator
+     * @requires settings != null
+     * @modifies settings
+     * @effects read from local file
+     */
+    public void loadSettings(boolean showDialog) {
+        if (this.settings.isSaveLocalUnavailable()) {
+            return;
+        }
+        File f = new File(this.settingPath + "settings.ini");
+        if (f.exists() && !f.isDirectory()) {
+            try {
+                BufferedReader b = new BufferedReader(new FileReader(f));
+                String line;
+                String theme = null;
+                Integer red = null;
+                Integer green = null;
+                Integer blue = null;
+                while ((line = b.readLine()) != null) {
+                    String[] parts = line.split("=");
+                    if (parts.length < 2) {
+                        continue;
+                    }
+                    Log.debug(ANSI_CYAN + "DEBUG: [GUIController] Loading setting item \""
+                            + parts[0] + "\"= " + ANSI_RESET + parts[1]);
+                    switch (parts[0]) {
+                        case "language":
+                            this.settings.setLanguage(parts[1], this, false);
+                            break;
+                        case "theme":
+                            theme = parts[1];
+                            break;
+                        case "red":
+                            red = Integer.parseInt(parts[1]);
+                            break;
+                        case "green":
+                            green = Integer.parseInt(parts[1]);
+                            break;
+                        case "blue":
+                            blue = Integer.parseInt(parts[1]);
+                            break;
+                        case "ignore":
+                            for (String courseName: parts[1].split(",")) {
+                                this.addIgnoredCourse(courseName);
+                            }
+                    }
+                    this.settings.put(parts[0], Boolean.parseBoolean(parts[1]));
+                }
+                if (theme != null && red != null && green != null && blue != null) {
+                    this.settings.setTheme(theme, this, new Color(red, green, blue));
+                }
+                b.close();
+            } catch (IOException e) {
+                Log.debug("[GUIController] Error when loading settings: ", e.getMessage());
+                Log.error("[GUIController] Error when loading settings: ", e);
+                return;
+            }
+            if (showDialog) {
+                JLabel label = new JLabel("Settings load successfully.");
+                label.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 16));
+                JOptionPane.showConfirmDialog(frame, label,
+                        "", JOptionPane.DEFAULT_OPTION,
+                        JOptionPane.PLAIN_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * This method would save settings to a local file.
+     *
+     * @param showDialog if the program should show a dialog indicator
+     * @requires settings != null
+     * @modifies None
+     * @effects save to local file
+     */
+    public void saveSettings(boolean showDialog) {
+        if (this.settings.isSaveLocalUnavailable()) {
+            return;
+        }
+        PrintWriter writer;
+        try {
+            writer = new PrintWriter(this.settingPath + "settings.ini", "UTF-8");
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+                Log.error("[MainController] error when saving settings: ", e);
+            this.alert("<html>" + this.getFrame().getText("settings_save_failed")
+                    + "<br>" + this.getFrame().getText("error_code") + " " + e.getMessage() + "</html>");
+            return;
+        }
+        writer.println("language=" + settings.getLanguage());
+        writer.println("theme=" + settings.getTheme());
+        writer.println("red=" + settings.getThemeColor().getRed());
+        writer.println("green=" + settings.getThemeColor().getGreen());
+        writer.println("blue=" + settings.getThemeColor().getBlue());
+        writer.print("ignore=");
+        for (String courseName: this.ignoredCoursesSet) {
+            writer.print(courseName + ",");
+        }
+        writer.println();
+        for (Map.Entry<String, Boolean> item: this.settings.getAllSettings().entrySet()) {
+            writer.println(item.getKey() + "=" + item.getValue());
+        }
+        writer.close();
+
+        if (showDialog) {
+            this.notification("main", this.getFrame().getText("settings_save_success"), "");
         }
     }
 
@@ -196,6 +387,9 @@ public class GUIController extends AbstractController implements Operations {
      * @effects read from local file
      */
     public void loadFromLocal(File file, String extension, boolean showDialog) {
+        if (this.settings.isSaveLocalUnavailable()) {
+            return;
+        }
         if (file == null)
             file = new File(this.settingPath + "deadlines.json");
         if (file.exists() && !file.isDirectory()) {
@@ -203,7 +397,7 @@ public class GUIController extends AbstractController implements Operations {
             try {
                  fileReader = new FileReader(file);
             } catch (IOException e) {
-                System.err.println("[MainController] error when loading deadlines: " + e);
+                Log.error("[MainController] error when loading deadlines: ", e);
                 this.alert("<html>" + this.getFrame().getText("loading_from") + "<br>"
                         + this.getFrame().getText("error_code") + e.getMessage());
                 return;
@@ -212,7 +406,7 @@ public class GUIController extends AbstractController implements Operations {
             Thread thread = localParser.Parser.getParserThread(load, extension, this, showDialog);
             thread.run();
         } else {
-            System.out.println("DEBUG: [Load] Error when loading settings from local: " +
+            Log.debug("DEBUG: [Load] Error when loading settings from local: " +
                     "file.exists() = " + file.exists() + ", file.isDirectory() = " + file.isDirectory());
         }
     }
@@ -245,6 +439,9 @@ public class GUIController extends AbstractController implements Operations {
      * @effects save to local file
      */
     public void saveToLocal(File file, String extension, boolean showDialog) {
+        if (this.getSettings().isSaveLocalUnavailable()) {
+            return;
+        }
         if (file == null)
             file = new File(this.settingPath + "deadlines.json");
 
@@ -253,7 +450,7 @@ public class GUIController extends AbstractController implements Operations {
             try {
                  fileWriter = new PrintWriter(file, "UTF-8");
             } catch (IOException e) {
-                System.err.println("[MainController] error when saving settings: " + e);
+                Log.error("[MainController] error when saving settings: ", e);
                 this.alert("<html>" + this.getFrame().getText("saving_to") + "<br>"
                         + this.getFrame().getText("error_code") + e.getMessage());
                 return;
@@ -262,13 +459,13 @@ public class GUIController extends AbstractController implements Operations {
             Thread thread = localParser.Parser.getParserThread(save, extension, this, showDialog);
             thread.start();
         } else {
-            System.out.println("DEBUG: [Save] IOException");
+            Log.debug("DEBUG: [Save] IOException");
         }
     }
 
     /**
      * This method should ask the user to agree with following statement:
-     * I acknowledge that main will not save my username and
+     * I acknowledge that this program will not save my username and
      * password in any form after the program terminates and will not
      * use my username and password for any use other than grabbing deadline
      * dates. I understand that I should take my own risk using this
@@ -279,8 +476,10 @@ public class GUIController extends AbstractController implements Operations {
      * @modifies None
      * @effects None
      */
+    @Override
     public boolean agreement() {
         JLabel label = new JLabel(this.frame.getTextFormat().userAgreement());
+        label.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 16));
         int n = JOptionPane.showConfirmDialog(this.frame, label,
                 this.frame.getTextFormat().userAgreementTitle(), JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.PLAIN_MESSAGE);
@@ -308,27 +507,27 @@ public class GUIController extends AbstractController implements Operations {
             public void run() {
                 SubmittyAccess sa = new SubmittyAccess(id, password, dialog.getCurrProgressLabel());
                 sa.login();
-                System.out.println("DEBUG: [access] login succeeded.");
+                Log.debug("DEBUG: [access] login succeeded.");
                 sa.parser(ignoredCoursesSet);
-                System.out.println("DEBUG: [access] parser succeeded.");
+                Log.debug("DEBUG: [access] parser succeeded.");
                 ConcurrentHashMap<String, Course> newCourses = sa.getCourseMap();
                 sa.close();
-                System.out.println("DEBUG: [access] getCourseMap succeeded.");
+                Log.debug("DEBUG: [access] getCourseMap succeeded.");
                 boolean shouldAdd = true;
                 synchronized (this) {
                     if (!dialog.isVisible()) {
-                        System.out.println("DEBUG: [access] dialog no longer visible");
+                        Log.debug("DEBUG: [access] dialog no longer visible");
                         shouldAdd = false;
                     }
                 }
                 if (!shouldAdd) {
                     dialog.dispose();
-                    System.out.println("DEBUG: [access] closing thread");
+                    Log.debug("DEBUG: [access] closing thread");
                     return;
                 }
                 for (String fullCourseName : newCourses.keySet()) {
-                    System.out.println("DEBUG: [access] handling course " + fullCourseName);
-                    String courseName = fullCourseName.replace("Spring 2019     ", "").trim();
+                    Log.debug("DEBUG: [access] handling course " + fullCourseName);
+                    String courseName = fullCourseName.replace("Fall 2019     ", "").trim();
                     synchronized (this) {
                         if (allCourses.containsKey(courseName)) {
                             assert (allCourses.get(courseName) != null);
@@ -340,7 +539,7 @@ public class GUIController extends AbstractController implements Operations {
                         }
                     }
                 }
-                System.out.println("DEBUG: [access] handling courses succeeded.");
+                Log.debug("DEBUG: [access] handling courses succeeded.");
                 if (newCourses.isEmpty()) {
                     alert(getFrame().getText("no_deadline"));
                 }
@@ -354,12 +553,28 @@ public class GUIController extends AbstractController implements Operations {
         };
         final RuntimeException[] exceptionFromAccess = {null};
         Thread.UncaughtExceptionHandler loginFailedHandler = (th, e) -> {
+            Log.debug("DEBUG [UncaughtExceptionHandler] caught exception " + e.getMessage());
             if (e instanceof SubmittyAccess.LoginFailException) {
-                System.out.println("DEBUG [UncaughtExceptionHandler] caught exception " + e.getMessage());
                 exceptionFromAccess[0] = (SubmittyAccess.LoginFailException) e;
-                dialog.setVisible(false);
-                dialog.dispose();
+                if (e.getMessage().equals("Login failed: Could not login using " +
+                    "that user id or password")) {
+                    dialog.getCurrProgressLabel().setText(e.getMessage());
+                } else {
+                    dialog.getCurrProgressLabel().setText("<html>Login failed. " +
+                            "Please check your  <br> Internet connection and try again. </html>");
+                }
+            } else {
+                exceptionFromAccess[0] = (RuntimeException) e;
+                dialog.getCurrProgressLabel().setText("<html>Login failed. " +
+                        "Please check your  <br> Internet connection and try again. </html>");
             }
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+            dialog.setVisible(false);
+            dialog.dispose();
         };
 
         Thread accessThread = new Thread(access);
@@ -371,9 +586,9 @@ public class GUIController extends AbstractController implements Operations {
         // block main thread until submitty access finished
         dialog.run();
         if (exceptionFromAccess[0] == null) {
-            System.out.println("DEBUG: [access] login succeed. Dialog closed.");
+            Log.debug("DEBUG: [access] login succeed. Dialog closed.");
         } else {
-            System.out.println("DEBUG [MainThreadAccess] success = false");
+            Log.debug("DEBUG [MainThreadAccess] success = false");
             throw exceptionFromAccess[0];
         }
     }
@@ -389,18 +604,42 @@ public class GUIController extends AbstractController implements Operations {
      * @param day          the day number; starts from 1 to 31
      * @param hour         the hour number
      * @param minute       the minute number
+     * @param status       the status of this deadline
+     * @requires None
+     * @modifies a list that stores every course and their information
+     * @effects None
+     */
+    @Deprecated
+    public synchronized void addDeadline(String course, String deadlineName, int year, int month,
+                            int day, int hour, int minute, String status) {
+        this.addDeadline(course, deadlineName, year, month, day, hour, minute, status, "");
+    }
+
+    /**
+     * This method would add a new deadline to an existing course. If such course
+     * doesn't exist, then such course instance will be created
+     *
+     * @param course       the course name
+     * @param deadlineName the deadline name
+     * @param year         year number
+     * @param month        month number; starts from 1 to 12
+     * @param day          the day number; starts from 1 to 31
+     * @param hour         the hour number
+     * @param minute       the minute number
+     * @param status       the status of this deadline
+     * @param link         the link to the project
      * @requires None
      * @modifies a list that stores every course and their information
      * @effects None
      */
     @Override
     public synchronized void addDeadline(String course, String deadlineName, int year, int month,
-                            int day, int hour, int minute) {
+                            int day, int hour, int minute, String status, String link) {
         Deadline deadline;
         try {
-            deadline = new Deadline(year, month, day, hour, minute, deadlineName, course);
-        } catch (RuntimeException e) { // TODO make specific
-            System.err.println("DEBUG: [controller] Due date format not correct: " + e);
+            deadline = new Deadline(year, month, day, hour, minute, deadlineName, course, status, link);
+        } catch (CalendarWrapper.CalendarFormatException e) {
+            Log.error("DEBUG: [controller] Due date format not correct: ", e);
             this.notification("Add deadline failed",
                     this.getFrame().getTextFormat().dateFormat(year, month, day) +
                     " is not a valid date.", "");
@@ -419,9 +658,9 @@ public class GUIController extends AbstractController implements Operations {
      * @effects None
      */
     public synchronized void addDeadline(Deadline deadline) {
-        Course c = this.getCourseByName(deadline.getCourse());
+        Course c = this.getCourseByName(deadline.getCourseName());
         c.addDeadline(deadline);
-        this.allCourses.put(deadline.getCourse(), c);
+        this.allCourses.put(deadline.getCourseName(), c);
         this.allDeadlines.add(deadline);
         this.frame.addDeadlineBlock(deadline);
         this.frame.updateTrayIcon();
@@ -478,7 +717,7 @@ public class GUIController extends AbstractController implements Operations {
         if (course == null || course.equals("")) {
             return;
         }
-        System.out.println("DEBUG: [GUIController] <" + course + "> is now ignored");
+        Log.debug("DEBUG: [GUIController] <" + course + "> is now ignored", ANSI_PURPLE);
         this.ignoredCoursesSet.add(course);
         for (Map.Entry<String, DeadlineTimer> item: this.frame.getAllTimersMap().entrySet()) {
             if (item.getKey().startsWith(course)) {
@@ -499,7 +738,7 @@ public class GUIController extends AbstractController implements Operations {
      */
     @Override
     public void removeIgnoredCourse(String course) {
-        System.out.println("DEBUG: [GUIController] <" + course + "> is no longer ignored");
+        Log.debug("DEBUG: [GUIController] <" + course + "> is no longer ignored", ANSI_CYAN);
         this.ignoredCoursesSet.remove(course);
         for (Map.Entry<String, DeadlineTimer> item: this.frame.getAllTimersMap().entrySet()) {
             if (item.getKey().startsWith(course)) {

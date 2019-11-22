@@ -18,6 +18,12 @@ public class TextFactory {
      * @return a new BaseText instance
      */
     public static BaseText createTextFormat(String locale, ResourceBundle textResource) {
-        return new English(textResource);
+        switch (locale) {
+            case "zh_Hant":
+            case "zh_CN":
+                return new Chinese(textResource);
+            default:
+                return new English(textResource);
+        }
     }
 }

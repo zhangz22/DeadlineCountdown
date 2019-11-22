@@ -3,10 +3,11 @@ package main.viewer.calendarPanel;
 import javafx.util.Pair;
 import model.CalendarWrapper;
 import model.Deadline;
+import main.viewer.Log;
 import main.controller.GUIController;
 import main.viewer.textFormat.BaseText;
+import main.viewer.textFormat.ViewerFont;
 import main.viewer.theme.Theme;
-import org.joda.time.DateTime;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -106,7 +107,7 @@ public class CalendarPanel extends JPanel {
         this.weekdayTitlePanel.revalidate();
         this.weekdayTitlePanel.repaint();
         int i, max;
-        if (true /*Start From Sunday TODO */) {
+        if (parent.getSettings().isStartFromSunday()) {
             i = 0;
             max = 7;
         } else {
@@ -115,6 +116,7 @@ public class CalendarPanel extends JPanel {
         }
         for (; i < max; i++) {
             DateBlock currWeekday = new DateBlock(0, 0, 0, textStr.weekFormat(i), this);
+            currWeekday.getDateTextPanel().setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 19));
             this.weekdayTitlePanel.add(currWeekday);
         }
     }
@@ -137,7 +139,7 @@ public class CalendarPanel extends JPanel {
         c.setMonth(this.displayMonth);
         // how many days there are before the first day
         int numOfDaysBeforeFirstDay = c.getWeekDayOfFirstDayInMonth() - 1;
-        if (true /*Start From Sunday TODO */) {
+        if (parent.getSettings().isStartFromSunday()) {
             numOfDaysBeforeFirstDay += 1;
         }
         if (numOfDaysBeforeFirstDay == -1) {
@@ -189,17 +191,18 @@ public class CalendarPanel extends JPanel {
      * @effects None
      */
     private void addSingleDeadlineBlock(Deadline deadline) {
-        if (deadline.isBefore(CalendarWrapper.now())) {
+        if (deadline.isBefore(CalendarWrapper.now()) &&
+            !parent.getSettings().isShowPastDeadlines()) {
             return;
         }
-        if (parent.isIgnoring(deadline.getCourse())) {
+        if (parent.isIgnoring(deadline.getCourseName())) {
             return;
         }
         if (deadline.getMonth() == this.displayMonth && deadline.getYear() == this.displayYear) {
-            System.out.println("DEBUG: [CalendarPanel] {" +
-                    deadline.getName() + " <" + deadline.getCourse() + "> (" +
+            Log.debug("DEBUG: [CalendarPanel] {" +
+                    deadline.getName() + " <" + deadline.getCourseName() + "> (" +
                     CalendarWrapper.getTimeStr(deadline.getYear(), deadline.getMonth(), deadline.getDay(), deadline.getHour(), deadline.getMinute()) + ")" +
-                    "} will be added to calendar.");
+                    "} will be added to calendar.", Log.ANSI_BLUE);
             this.getDatePanel(deadline.getDay()).addDeadline(new DeadlineBlock(this, deadline));
             this.getDatePanel(deadline.getDay()).getLowerPart().add(Box.createVerticalStrut(1));
         }
@@ -235,9 +238,10 @@ public class CalendarPanel extends JPanel {
         }
         for (String deadlineName: this.allDeadlines.keySet()) {
             Deadline currDeadline = this.allDeadlines.get(deadlineName);
-            String course = this.allDeadlines.get(deadlineName).getCourse();
+            String course = this.allDeadlines.get(deadlineName).getCourseName();
             if (parent.isIgnoring(course)) continue;
-            if (currDeadline.isBefore(CalendarWrapper.now())) {
+            if (!parent.getSettings().isShowPastDeadlines() &&
+                    currDeadline.isBefore(CalendarWrapper.now())) {
                 continue;
             }
             this.addSingleDeadlineBlock(currDeadline);
@@ -350,7 +354,7 @@ public class CalendarPanel extends JPanel {
      * @effects remove a deadline
      */
     public void removeDeadline(String course, String deadlineName, int year, int month, int day) {
-        this.removeSingleDeadlineBlock(new Deadline(year, month, day, 0, 0, deadlineName, course));
+        this.removeSingleDeadlineBlock(new Deadline(year, month, day, 0, 0, deadlineName, course, Deadline.STATUS.DEFAULT, ""));
         this.allDeadlines.remove(deadlineName);
     }
 
@@ -383,7 +387,7 @@ public class CalendarPanel extends JPanel {
      * @effects edit a deadline
      */
     void handleEditSignal(String course, String deadlineName, int year, int month,
-                            int day, int hour, int minute) {
+                            int day, int hour, int minute, String status) {
         if (year == 0) {
             year = displayYear;
         }
@@ -396,7 +400,10 @@ public class CalendarPanel extends JPanel {
         if (minute == 0) {
             minute = CalendarWrapper.now().getMinuteOfHour();
         }
-        parent.editDeadline(new Deadline(year, month, day, hour, minute, deadlineName, course));
+        if (status == null) {
+            status = Deadline.STATUS.DEFAULT;
+        }
+        parent.editDeadline(new Deadline(year, month, day, hour, minute, deadlineName, course, status, ""));
     }
 
     /**

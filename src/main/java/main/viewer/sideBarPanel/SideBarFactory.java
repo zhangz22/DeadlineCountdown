@@ -1,12 +1,10 @@
 package main.viewer.sideBarPanel;
 
-import main.viewer.mainFactory;
+import main.viewer.DeadlineCountdownFactory;
+import main.viewer.textFormat.ViewerFont;
 import main.viewer.util.ModernScrollPane;
 
-import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
-import javax.swing.ButtonModel;
-import javax.swing.Icon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -45,7 +43,7 @@ class SideBarFactory {
      * @return a 1 pixel height JPanel
      */
     static JPanel createLineSeparator(Color color) {
-        JPanel line =  mainFactory.createEmptyArea(1, false);
+        JPanel line =  DeadlineCountdownFactory.createEmptyArea(1, false);
         line.setBackground(color);
         return line;
     }
@@ -63,6 +61,7 @@ class SideBarFactory {
      */
     static JLabel createSimpleLabel(String text, int fontSize, Color textColor) {
         JLabel label = new JLabel(text);
+        label.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, fontSize));
         label.setForeground(textColor);
         return label;
     }
@@ -131,7 +130,7 @@ class SideBarFactory {
         choiceBox.setUI(new BasicComboBoxUI() {
             @Override
             protected JButton createArrowButton() {
-                 JButton arrowButton = mainFactory.createSimpleButton("\u2BC6", backgroundColor, textColor);
+                 JButton arrowButton = DeadlineCountdownFactory.createSimpleButton("\u2BC6", backgroundColor, textColor);
                  arrowButton.setBackground(hoverColor);
                  return arrowButton;
             }
@@ -154,6 +153,7 @@ class SideBarFactory {
         choiceBox.setForeground(textColor);
         choiceBox.setOpaque(false);
         choiceBox.setBackground(backgroundColor);
+        choiceBox.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 16));
         JList list = ((BasicComboPopup) choiceBox.getAccessibleContext().getAccessibleChild(0)).getList();
         list.setSelectionBackground(hoverColor);
         list.setSelectionForeground(textColor);
@@ -207,6 +207,7 @@ class SideBarFactory {
         checkBox.setBorderPaintedFlat(true);
         checkBox.setFocusPainted(false);
         checkBox.setOpaque(false);
+        checkBox.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 20));
         checkBox.setFocusPainted(false);
         checkBox.setForeground(textColor);
         try {
@@ -226,7 +227,7 @@ class SideBarFactory {
      * @return the logo of main
      */
     static JTextArea createIcon(Color textColor) {
-        JTextArea icon = createSimpleTextArea("            ", 55,
+        JTextArea icon = createSimpleTextArea("  Deadline Countdown   ", 55,
                 textColor);
         icon.setFont(new Font("Berlin Sans FB Demi", Font.PLAIN, 32));
         icon.setVisible(true);
@@ -256,6 +257,7 @@ class SideBarFactory {
         panel.setBorderPainted(false);
         panel.setMargin(new Insets(0, 0, 0, 0));
         JTextArea hint = createSimpleTextArea("⇵  " + text, 39, textColor);
+        hint.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 20));
         hint.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(hint);
         panel.add(choiceBox);

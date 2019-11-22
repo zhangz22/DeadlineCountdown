@@ -12,7 +12,6 @@ import javax.swing.event.MenuKeyListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.KeyEvent;
@@ -172,7 +171,7 @@ public class mainFactory {
             }
         } else if (n == 1) {
             // save to
-            JFileChooser fileChooser = mainFactory.createFileChooser("deadlines",
+            JFileChooser fileChooser = DeadlineCountdownFactory.createFileChooser("deadlines",
                     parent.getFrame().getTextResource());
             int result;
             if (type.equals("SAVE"))

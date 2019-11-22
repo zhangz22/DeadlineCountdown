@@ -1,6 +1,7 @@
 package main;
 
 import main.controller.GUIController;
+import main.viewer.Log;
 
 import javax.swing.SwingUtilities;
 import java.util.Locale;
@@ -24,9 +25,14 @@ public class Main {
 
     public static void main(String[] args) {
         System.setProperty("app.profile", getUserAppDirectory());
+        Log.error("TEST: Set " + getUserAppDirectory() + " to save logs");
         SwingUtilities.invokeLater(() -> {
-            GUIController window = new GUIController();
-            window.run(args);
+            // try {
+                GUIController window = new GUIController();
+                window.run(args);
+            // } catch (Exception e) {
+            //     Log.error("Unhandled bug: ", e);
+            // }
         });
     }
 }

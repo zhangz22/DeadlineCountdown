@@ -2,9 +2,9 @@ package main.viewer.sideBarPanel;
 
 import model.CalendarWrapper;
 import model.Deadline;
-import main.controller.GUIController;
 import main.viewer.DeadlineBlockInterface;
-import main.viewer.mainFactory;
+import main.viewer.DeadlineCountdownFactory;
+import main.viewer.textFormat.ViewerFont;
 import main.viewer.util.DeadlineExporter;
 import org.joda.time.DateTime;
 
@@ -45,7 +45,7 @@ class DeadlineInfoBlock extends JPanel implements DeadlineBlockInterface {
         this.setLayout(new BorderLayout());
         this.setBackground(null);
         this.setOpaque(false);
-        this.addMouseListener(mainFactory.getHoverEffect(this, parent.getTheme().SIDEBAR_HOVER()));
+        this.addMouseListener(DeadlineCountdownFactory.getHoverEffect(this, parent.getTheme().SIDEBAR_HOVER()));
         this.parent = parent;
         this.blockName = name;
 
@@ -53,10 +53,11 @@ class DeadlineInfoBlock extends JPanel implements DeadlineBlockInterface {
         JTextArea deadlineName = SideBarFactory.createSimpleTextArea(name, null,
                 parent.getTheme().SIDEBAR_TEXT());
         deadlineName.setAlignmentX(Component.LEFT_ALIGNMENT);
+        deadlineName.setFont(new Font(ViewerFont.XHEI, Font.BOLD, 18));
         deadlineName.setMargin(new Insets(2, 5, 2, 5));
         deadlineName.setLineWrap(true);
         deadlineName.setWrapStyleWord(true);
-        deadlineName.addMouseListener(mainFactory.getHoverEffect(this,
+        deadlineName.addMouseListener(DeadlineCountdownFactory.getHoverEffect(this,
                 parent.getTheme().SIDEBAR_HOVER()));
         this.add(deadlineName, BorderLayout.NORTH);
 
@@ -65,15 +66,16 @@ class DeadlineInfoBlock extends JPanel implements DeadlineBlockInterface {
                 parent.getMainmainGUI().getFrame().getTextFormat().getRemainingText(deadline, null, true),
                 null, parent.getTheme().SIDEBAR_TEXT());
         remainTime.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        remainTime.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 18));
         remainTime.setMargin(new Insets(2, 5, 2, 5));
         remainTime.setLineWrap(true);
         remainTime.setWrapStyleWord(true);
-        remainTime.addMouseListener(mainFactory.getHoverEffect(this,
+        remainTime.addMouseListener(DeadlineCountdownFactory.getHoverEffect(this,
                 parent.getTheme().SIDEBAR_HOVER()));
         this.add(remainTime, BorderLayout.SOUTH);
 
-        JPanel middleBlank = mainFactory.createEmptyArea(2, true);
-        middleBlank.addMouseListener(mainFactory.getHoverEffect(this,
+        JPanel middleBlank = DeadlineCountdownFactory.createEmptyArea(2, true);
+        middleBlank.addMouseListener(DeadlineCountdownFactory.getHoverEffect(this,
                 parent.getTheme().SIDEBAR_HOVER()));
 
         this.setMaximumSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH - 20,
@@ -84,17 +86,17 @@ class DeadlineInfoBlock extends JPanel implements DeadlineBlockInterface {
                 (getWrappedLines(deadlineName) + getWrappedLines(remainTime)) * 27));
 
         // add the right-click menu
-        JPopupMenu menu = mainFactory.createDeadlineBlockRightMenu(this,
+        JPopupMenu menu = DeadlineCountdownFactory.createDeadlineBlockRightMenu(this,
                 parent.getMainmainGUI().getFrame().getTheme().SIDEBAR_TEXT(),
                 parent.getMainmainGUI().getFrame().getTheme().SIDEBAR_BACKGROUND());
         this.setComponentPopupMenu(menu);
         deadlineName.setComponentPopupMenu(menu);
         this.remainTime.setComponentPopupMenu(menu);
         middleBlank.setComponentPopupMenu(menu);
-        this.addMouseListener(mainFactory.createRightClickMenuAction(menu));
-        deadlineName.addMouseListener(mainFactory.createRightClickMenuAction(menu));
-        this.remainTime.addMouseListener(mainFactory.createRightClickMenuAction(menu));
-        middleBlank.addMouseListener(mainFactory.createRightClickMenuAction(menu));
+        this.addMouseListener(DeadlineCountdownFactory.createRightClickMenuAction(menu));
+        deadlineName.addMouseListener(DeadlineCountdownFactory.createRightClickMenuAction(menu));
+        this.remainTime.addMouseListener(DeadlineCountdownFactory.createRightClickMenuAction(menu));
+        middleBlank.addMouseListener(DeadlineCountdownFactory.createRightClickMenuAction(menu));
 
         // click to jump
         MouseAdapter jumpToDate = new MouseAdapter() {
@@ -153,7 +155,7 @@ class DeadlineInfoBlock extends JPanel implements DeadlineBlockInterface {
      */
     @Override
     public String getCourseName() {
-        return this.deadline.getCourse();
+        return this.deadline.getCourseName();
     }
 
     /**
@@ -226,7 +228,7 @@ class DeadlineInfoBlock extends JPanel implements DeadlineBlockInterface {
      */
     @Override
     public void delete() {
-        this.parent.handleRemoveSignal(this.deadline.getCourse(),
+        this.parent.handleRemoveSignal(this.deadline.getCourseName(),
                 this.deadline.getName(),
                 this.deadline.getYear(),
                 this.deadline.getMonth(),

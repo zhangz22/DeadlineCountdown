@@ -1,6 +1,7 @@
 package main.viewer.calendarPanel;
 
 import model.CalendarWrapper;
+import main.viewer.textFormat.ViewerFont;
 
 import javax.swing.*;
 import javax.swing.event.MenuKeyEvent;
@@ -46,6 +47,7 @@ class DateBlock extends RectangleWithTitle {
         this.dateTextPanel.setEnabled(false);
         this.dateTextPanel.setBackground(parent.getTheme().CAL_BACKGROUND());
         this.dateTextPanel.setDisabledTextColor(parent.getTheme().CAL_DATE_TEXT());
+        this.dateTextPanel.setFont(new Font(ViewerFont.XHEI, Font.BOLD, 22));
         this.dateTextPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         super.getUpperPart().setLayout(new BorderLayout());
         super.getUpperPart().add(dateTextPanel, BorderLayout.WEST);
@@ -80,7 +82,7 @@ class DateBlock extends RectangleWithTitle {
             @Override
             public void menuKeyPressed(MenuKeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_DELETE || e.getKeyCode() == KeyEvent.VK_D) {
-                    parent.handleEditSignal("","",0,0,Integer.valueOf(date),0,0);
+                    parent.handleEditSignal("","",0,0,Integer.valueOf(date),0,0,null);
                 }
             }
 
@@ -90,7 +92,8 @@ class DateBlock extends RectangleWithTitle {
         });
         addNewDeadline.setForeground(parent.getTheme().RIGHT_MENU_TEXT());
         addNewDeadline.setBackground(parent.getTheme().RIGHT_MENU_BACKGROUND());
-        addNewDeadline.addActionListener(e2 -> parent.handleEditSignal("","",0,0,Integer.valueOf(date),0,0));
+        addNewDeadline.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 14));
+        addNewDeadline.addActionListener(e2 -> parent.handleEditSignal("","",0,0,Integer.valueOf(date),0,0,null));
         addDeadlineMenu.add(addNewDeadline);
         addDeadlineMenu.setForeground(parent.getTheme().SIDEBAR_TEXT());
         addDeadlineMenu.setBackground(parent.getTheme().SIDEBAR_BACKGROUND());

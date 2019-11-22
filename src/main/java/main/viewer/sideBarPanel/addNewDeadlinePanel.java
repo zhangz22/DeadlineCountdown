@@ -3,7 +3,9 @@ package main.viewer.sideBarPanel;
 import javafx.util.Pair;
 import model.CalendarWrapper;
 import model.Deadline;
-import main.viewer.mainFactory;
+import main.viewer.Log;
+import main.viewer.DeadlineCountdownFactory;
+import main.viewer.textFormat.ViewerFont;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -25,11 +27,13 @@ class addNewDeadlinePanel extends JPanel {
     private GridBagConstraints constraint;
     private JComboBox<String> courseNameBox;
     private JTextField deadlineNameField;
+    private JTextField linkField;
     private JComboBox<String> yearField;
     private JComboBox<String> monthField;
     private JComboBox<String> dayField;
     private JComboBox<String> minuteField;
     private JComboBox<String> hourField;
+    private JComboBox<String> statusField;
     private int oldYear, oldMonth, oldDay;
     private String oldName, oldCourse;
 
@@ -92,6 +96,7 @@ class addNewDeadlinePanel extends JPanel {
         this.deadlineNameField = new JTextField();
         this.deadlineNameField.setBackground(parent.getTheme().SIDEBAR_HOVER());
         this.deadlineNameField.setForeground(parent.getTheme().SIDEBAR_TEXT());
+        this.deadlineNameField.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 18));
         this.deadlineNameField.setMaximumSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 20));
         this.deadlineNameField.setPreferredSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 20));
         this.deadlineNameField.setSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 20));
@@ -107,7 +112,7 @@ class addNewDeadlinePanel extends JPanel {
 
         // area to let user enters the deadline date
         constraint.fill = GridBagConstraints.NONE;
-        JPanel dateSelectionPanel = mainFactory.createPanel(330, 45, true);
+        JPanel dateSelectionPanel = DeadlineCountdownFactory.createPanel(330, 45, true);
         dateSelectionPanel.setLayout(new GridLayout(2, 3,5,5));
         dateSelectionPanel.add(SideBarFactory.createSimpleLabel(getText("year_field"), 15,
                 parent.getTheme().SIDEBAR_TEXT()));
@@ -147,7 +152,7 @@ class addNewDeadlinePanel extends JPanel {
         dateSelectionPanel.add(this.dayField);
 
         // area to let user enters the deadline hour
-        JPanel timeSelectionPanel = mainFactory.createPanel(330, 45, true);
+        JPanel timeSelectionPanel = DeadlineCountdownFactory.createPanel(330, 45, true);
         timeSelectionPanel.setLayout(new GridLayout(2, 2,5,5));
         timeSelectionPanel.add(SideBarFactory.createSimpleLabel(getText("hour_field"),
                 15, parent.getTheme().SIDEBAR_TEXT()));
@@ -175,18 +180,60 @@ class addNewDeadlinePanel extends JPanel {
         timeSelectionPanel.add(this.minuteField);
         this.addToPanel(timeSelectionPanel, 0, 6, 1);
 
+        // area to let user enters the deadline link
+        this.linkField = new JTextField();
+        this.linkField.setBackground(parent.getTheme().SIDEBAR_HOVER());
+        this.linkField.setForeground(parent.getTheme().SIDEBAR_TEXT());
+        this.linkField.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 18));
+        this.linkField.setMaximumSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 20));
+        this.linkField.setPreferredSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 20));
+        this.linkField.setSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 20));
+        this.linkField.setMinimumSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 20));
+        this.linkField.setBorder(BorderFactory.createEmptyBorder());
+        this.linkField.setCaretColor(parent.getTheme().SIDEBAR_TEXT());
+
+        JPanel linkSelectionPanel = DeadlineCountdownFactory.createPanel(SideBarPanel.SIDEBAR_WIDTH, 45, true);
+        linkSelectionPanel.setLayout(new GridLayout(2, 1,5,5));
+        linkSelectionPanel.add(SideBarFactory.createSimpleLabel(getText("link_field"), 15,
+                parent.getTheme().SIDEBAR_TEXT()));
+        linkSelectionPanel.add(this.linkField);
+        this.addToPanel(linkSelectionPanel, 0, 7, 1);
+
+        // area to let user enters the deadline status
+        this.statusField = SideBarFactory.createEditableComboBox(parent.getTheme().SIDEBAR_HOVER(),
+                parent.getTheme().SIDEBAR_BACKGROUND(), parent.getTheme().SIDEBAR_TEXT());
+        for (String s: Deadline.STATUS.getAllStatus()) {
+            this.statusField.addItem(s);
+        }
+        this.statusField.setEditable(false);
+        this.statusField.setMaximumSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 20));
+        this.statusField.setPreferredSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 20));
+        this.statusField.setSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 20));
+        this.statusField.setMinimumSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 20));
+        this.statusField.setSelectedItem(Deadline.STATUS.DEFAULT);
+
+        JPanel statusSelectionPanel = DeadlineCountdownFactory.createPanel(SideBarPanel.SIDEBAR_WIDTH, 45, true);
+        statusSelectionPanel.setLayout(new GridLayout(2, 2,5,5));
+        statusSelectionPanel.add(SideBarFactory.createSimpleLabel(getText("status_field"), 15,
+                parent.getTheme().SIDEBAR_TEXT()));
+        statusSelectionPanel.add(this.statusField);
+        this.addToPanel(statusSelectionPanel, 0, 8, 1);
+        this.addToPanel(DeadlineCountdownFactory.createEmptyArea(1, true), 0, 9, 1);
+
+
         // the confirm and cancel button
 
-        JPanel buttons = mainFactory.createPanel(SideBarPanel.SIDEBAR_WIDTH, 22,true);
+        JPanel buttons = DeadlineCountdownFactory.createPanel(SideBarPanel.SIDEBAR_WIDTH, 22,true);
         buttons.setLayout(new BorderLayout());
 
-        JButton confirmBtn = mainFactory.createSimpleButton("  " + getText("ok") + "  ",
+        JButton confirmBtn = DeadlineCountdownFactory.createSimpleButton("  " + getText("ok") + "  ",
                 parent.getTheme().SIDEBAR_BACKGROUND(), parent.getTheme().SIDEBAR_TEXT());
         confirmBtn.setBackground(parent.getTheme().SIDEBAR_BACKGROUND());
+        confirmBtn.setFont(new Font(ViewerFont.XHEI, Font.BOLD, 18));
         confirmBtn.setMargin(new Insets(0,0,0,0));
         confirmBtn.setBorderPainted(true);
         confirmBtn.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
-        confirmBtn.addMouseListener(mainFactory.getHoverEffect(confirmBtn,
+        confirmBtn.addMouseListener(DeadlineCountdownFactory.getHoverEffect(confirmBtn,
                 parent.getTheme().SIDEBAR_HOVER()));
         confirmBtn.addActionListener(e -> {
             if (isAdd)
@@ -196,12 +243,13 @@ class addNewDeadlinePanel extends JPanel {
             parent.showSummary();
         });
 
-        JButton cancelBtn = mainFactory.createSimpleButton("  " + getText("cancel") + "  ",
+        JButton cancelBtn = DeadlineCountdownFactory.createSimpleButton("  " + getText("cancel") + "  ",
                 parent.getTheme().SIDEBAR_BACKGROUND(), parent.getTheme().SIDEBAR_TEXT());
         cancelBtn.setBackground(parent.getTheme().SIDEBAR_BACKGROUND());
+        cancelBtn.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 18));
         cancelBtn.setMargin(new Insets(0,0,0,0));
         cancelBtn.addActionListener(e -> parent.showSummary());
-        cancelBtn.addMouseListener(mainFactory.getHoverEffect(cancelBtn,
+        cancelBtn.addMouseListener(DeadlineCountdownFactory.getHoverEffect(cancelBtn,
                 parent.getTheme().SIDEBAR_HOVER()));
 
         buttons.add(confirmBtn, BorderLayout.WEST);
@@ -234,7 +282,7 @@ class addNewDeadlinePanel extends JPanel {
         // update course combo box
         this.refreshCourseNameBox();
         // change the input fields
-        this.courseNameBox.setSelectedItem(deadline.getCourse());
+        this.courseNameBox.setSelectedItem(deadline.getCourseName());
         SwingUtilities.invokeLater(() ->
                 ((JTextField)courseNameBox.getEditor().getEditorComponent()).setCaretPosition(0));
         this.deadlineNameField.setText(deadline.getName());
@@ -244,11 +292,39 @@ class addNewDeadlinePanel extends JPanel {
         this.dayField.setSelectedItem(String.valueOf(deadline.getDay()));
         this.hourField.setSelectedItem(String.valueOf(deadline.getHour()));
         this.minuteField.setSelectedItem(String.valueOf(deadline.getMinute()));
+        this.linkField.setText(deadline.getLink());
+        SwingUtilities.invokeLater(() -> linkField.setCaretPosition(0));
+        switch (deadline.getStatus()) {
+            case Deadline.STATUS.RESUBMIT:
+                this.statusField.setSelectedItem(Deadline.STATUS.RESUBMIT);
+                break;
+            case Deadline.STATUS.FINISHED:
+                this.statusField.setSelectedItem(Deadline.STATUS.FINISHED);
+                break;
+            case Deadline.STATUS.LATE_SUBMIT:
+                this.statusField.setSelectedItem(Deadline.STATUS.LATE_SUBMIT);
+                break;
+            case Deadline.STATUS.LATE_RESUBMIT:
+                this.statusField.setSelectedItem(Deadline.STATUS.LATE_RESUBMIT);
+                break;
+            case Deadline.STATUS.MUST_ON_TEAM:
+                this.statusField.setSelectedItem(Deadline.STATUS.MUST_ON_TEAM);
+                break;
+            case Deadline.STATUS.OVERDUE_SUBMISSION:
+                this.statusField.setSelectedItem(Deadline.STATUS.OVERDUE_SUBMISSION);
+                break;
+            case Deadline.STATUS.NO_SUBMISSION:
+                this.statusField.setSelectedItem(Deadline.STATUS.NO_SUBMISSION);
+                break;
+            default:
+                this.statusField.setSelectedItem(Deadline.STATUS.DEFAULT);
+                break;
+        }
         this.oldYear = deadline.getYear();
         this.oldMonth = deadline.getMonth();
         this.oldDay = deadline.getDay();
         this.oldName = deadline.getName();
-        this.oldCourse = deadline.getCourse();
+        this.oldCourse = deadline.getCourseName();
     }
 
     /**
@@ -264,7 +340,8 @@ class addNewDeadlinePanel extends JPanel {
         if (this.yearField.getSelectedItem() == null || this.monthField.getSelectedItem() == null ||
                 this.dayField.getSelectedItem() == null || this.hourField.getSelectedItem() == null ||
                 this.minuteField.getSelectedItem() == null ||
-                this.deadlineNameField.getText() == null || this.deadlineNameField.getText().equals("")) {
+                this.deadlineNameField.getText() == null || this.deadlineNameField.getText().equals("") ||
+                this.statusField.getSelectedItem() == null) {
             return;
         }
         int year = Integer.parseInt((String) this.yearField.getSelectedItem());
@@ -272,15 +349,17 @@ class addNewDeadlinePanel extends JPanel {
         int day = Integer.parseInt((String) this.dayField.getSelectedItem());
         int hour = Integer.parseInt((String) this.hourField.getSelectedItem());
         int minute = Integer.parseInt((String) this.minuteField.getSelectedItem());
+        String status = (String) this.statusField.getSelectedItem();
         String deadlineName = this.deadlineNameField.getText();
         String courseName = (String) this.courseNameBox.getSelectedItem();
-        System.out.println("DEBUG: [newDeadlinePanel] adding " + courseName +
+        String link = this.linkField.getText();
+        Log.debug("DEBUG: [newDeadlinePanel] adding " + courseName +
                 ": " + deadlineName + " (" + year + "/" + month + "/" + day +"/"+ hour +"/" +
                 minute + ").");
         if (!add) {
             parent.handleRemoveSignal(this.oldCourse, this.oldName, this.oldYear, this.oldMonth, this.oldDay);
         }
-        parent.handleAddDeadlineSignal(courseName, deadlineName, year, month, day, hour, minute);
+        parent.handleAddDeadlineSignal(courseName, deadlineName, year, month, day, hour, minute, status, link);
         if (!new Pair<>(month,year).equals(parent.getMainmainGUI().getFrame().getCalendarPanel().getDisplayDate())
             && !((month <= 0 || month > 12) || (day <= 0 || day > 31))) {
             parent.getMainmainGUI().getFrame().setMonthYear(month, year);

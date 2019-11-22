@@ -1,7 +1,8 @@
 package main.viewer.util;
 
 import main.controller.GUIController;
-import main.viewer.mainFactory;
+import main.viewer.DeadlineCountdownFactory;
+import main.viewer.textFormat.ViewerFont;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -57,6 +58,7 @@ public class LoginDialog extends JDialog {
         JTextArea hint = new JTextArea(parent.getFrame().getText("login_label"));
         hint.setBackground(null);
         hint.setOpaque(false);
+        hint.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 16));
         hint.setForeground(new Color(102,102,102));
         hint.setEnabled(false);
         hint.setDisabledTextColor(Color.BLACK);
@@ -64,11 +66,12 @@ public class LoginDialog extends JDialog {
         this.add(hint, 0,0,3);
 
         // gap between the id part and the username part
-        JPanel sep = mainFactory.createEmptyArea(4, true);
+        JPanel sep = DeadlineCountdownFactory.createEmptyArea(4, true);
         this.add(sep, 0,1,3);
 
         // ask for username
         JLabel usernameLabel = new JLabel(parent.getFrame().getText("username") +  ": ");
+        usernameLabel.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 13));
         this.add(usernameLabel, 0, 2,1);
 
         this.usernameField = new JTextField(20);
@@ -77,11 +80,12 @@ public class LoginDialog extends JDialog {
         }
         this.add(this.usernameField, 1,2,3);
 
-        JPanel sep2 = mainFactory.createEmptyArea(4, true);
+        JPanel sep2 = DeadlineCountdownFactory.createEmptyArea(4, true);
         this.add(sep2, 0,3,3);
 
         // ask for password
         JLabel passwordLabel = new JLabel(parent.getFrame().getText("password") +  ": ");
+        passwordLabel.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 13));
         this.add(passwordLabel, 0,4,1);
 
         this.passwordField = new JPasswordField(20);
@@ -93,6 +97,7 @@ public class LoginDialog extends JDialog {
             JTextArea messageLabel = new JTextArea(message);
             messageLabel.setBackground(null);
             messageLabel.setOpaque(false);
+            messageLabel.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 16));
             messageLabel.setForeground(new Color(102, 102, 102));
             messageLabel.setEnabled(false);
             messageLabel.setDisabledTextColor(Color.RED);
@@ -102,6 +107,7 @@ public class LoginDialog extends JDialog {
 
         // Buttons
         JButton confirmBtn = new JButton(parent.getFrame().getText("login"));
+        confirmBtn.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 14));
         confirmBtn.addActionListener(e -> {
             id = usernameField.getText().trim();
             password = new String(passwordField.getPassword());
@@ -109,6 +115,7 @@ public class LoginDialog extends JDialog {
         });
 
         JButton cancelBtn= new JButton(parent.getFrame().getText("cancel"));
+        cancelBtn.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 14));
         cancelBtn.addActionListener(e -> {
             id = null;
             password = null;

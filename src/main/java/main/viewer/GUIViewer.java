@@ -3,10 +3,12 @@ package main.viewer;
 import model.CalendarWrapper;
 import model.Deadline;
 import main.controller.GUIController;
+import main.controller.Settings;
 import main.viewer.calendarPanel.CalendarPanel;
 import main.viewer.calendarPanel.TitlePanel;
 import main.viewer.sideBarPanel.SideBarPanel;
 import main.viewer.textFormat.BaseText;
+import main.viewer.textFormat.ViewerFont;
 import main.viewer.textFormat.TextFactory;
 import main.viewer.theme.Theme;
 import main.viewer.theme.ThemeFactory;
@@ -14,7 +16,6 @@ import main.viewer.util.DeadlineTimer;
 import main.viewer.util.LoginDialog;
 import webService.SubmittyAccess;
 import javafx.util.Pair;
-import org.joda.time.DateTime;
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -78,10 +79,16 @@ public class GUIViewer extends JFrame {
         });
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        this.theme = ThemeFactory.createTheme("blue_theme");
-
-        this.textResource = ResourceBundle.getBundle("text", Locale.US);
-        this.textFormat = TextFactory.createTextFormat(null, this.textResource);
+        // load the font
+        try {
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            URL is = getClass().getResource("/fonts/XHei.ttf");
+            URL is2 = getClass().getResource("/fonts/BRLNSDB.TTF");
+            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, is.openStream()));
+            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, is2.openStream()));
+        } catch (IOException | FontFormatException e) {
+            e.printStackTrace();
+        }
 
         // set icon
         URL iconPath = getClass().getResource("/images/icon.png");
@@ -108,9 +115,57 @@ public class GUIViewer extends JFrame {
      * @effects setup components
      */
     public void setUp(boolean restart) {
+        // theme
+        this.theme = ThemeFactory.createTheme(this.controller.getSettings().getTheme());
+        Log.debug("DEBUG: [UIViewerSetup] Using " +
+                this.controller.getSettings().getTheme() + " as current theme");
+        if (this.controller.getSettings().getThemeColor() != null ) {
+            Color newThemeColor = this.controller.getSettings().getThemeColor();
+            if (!newThemeColor.equals(this.theme.SIDEBAR_BACKGROUND())) {
+                this.theme.set(Theme.SIDE_BAR_THEME, Theme.SIDEBAR_BACKGROUND, newThemeColor);
+                this.theme.set(Theme.SIDE_BAR_THEME, Theme.HOVER_OVER_SIDEBAR, new Color(
+                        (int) (newThemeColor.getRed() * 0.75),
+                        (int) (newThemeColor.getGreen() * 0.75),
+                        (int) (newThemeColor.getBlue() * 0.75)));
+            }
+            Log.debug("DEBUG: [UIViewerSetup] Changing main "
+                    + "theme color to " + newThemeColor.toString() + "(" + "#"
+                    + Integer.toHexString(newThemeColor.getRGB()).substring(2) +")");
+        }
+        UIManager.put("RadioButton.highlight", this.theme.SIDEBAR_TEXT());
+        UIManager.put("RadioButton.darkShadow", this.theme.SIDEBAR_TEXT());
+        UIManager.put("RadioButton.disabledText", this.theme.SIDEBAR_TEXT());
+        UIManager.put("RadioButton.foreground", this.theme.SIDEBAR_TEXT());
+        UIManager.put("RadioButton.highlight", this.theme.SIDEBAR_TEXT());
+        UIManager.put("RadioButton.light", this.theme.SIDEBAR_TEXT());
+        UIManager.put("RadioButton.select", this.theme.SIDEBAR_TEXT());
+        UIManager.put("RadioButton.shadow", this.theme.SIDEBAR_TEXT());
+
         // get language information
-        Locale locale = Locale.US;
-        this.textResource = ResourceBundle.getBundle("text", locale);
+        Locale locale;
+        switch (this.controller.getSettings().getLanguage()) {
+            case "en_US":
+                locale = Locale.US;
+                break;
+            case "zh_CN":
+                locale = Locale.CHINA;
+                break;
+            case "zh_Hant":
+                locale = new Locale("zh", "Hant");
+                break;
+            default:
+                locale = Locale.US;
+                break;
+        }
+        try {
+            this.textResource = ResourceBundle.getBundle("text", locale);
+        } catch (MissingResourceException e) {
+            this.textResource = ResourceBundle.getBundle("text", Locale.US);
+        }
+        this.textFormat = TextFactory.createTextFormat(this.controller.getSettings().getLanguage(), this.textResource);
+        if (!restart) {
+            this.controller.setSettings(Settings.SUPPORTED.START_FROM_SUNDAY, textFormat.startsFromSunday() == 1);
+        }
 
         // notification
         if (!restart) {
@@ -139,20 +194,20 @@ public class GUIViewer extends JFrame {
         this.calendarTitle = new TitlePanel(this.textFormat, this);
 
         // Add prev-month, next-month and setUpForAccess button to the calendarTitle
-        JButton prevMonthButton = mainFactory.createTitleButton("↑",
+        JButton prevMonthButton = DeadlineCountdownFactory.createTitleButton("↑",
                 this.getTheme().CAL_BACKGROUND(), this.getTheme().CAL_DATE_TEXT(), this.getTheme().HOVER_OVER_CAL());
         prevMonthButton.addActionListener(e -> this.increaseMonth(-1));
 
-        JButton nextMonthButton = mainFactory.createTitleButton("↓",
+        JButton nextMonthButton = DeadlineCountdownFactory.createTitleButton("↓",
                 this.getTheme().CAL_BACKGROUND(), this.getTheme().CAL_DATE_TEXT(), this.getTheme().HOVER_OVER_CAL());
         nextMonthButton.addActionListener(e -> this.increaseMonth(1));
 
-        JButton refreshButton = mainFactory.createTitleButton("↻ " + this.getText("submitty_login"),
+        JButton refreshButton = DeadlineCountdownFactory.createTitleButton("↻ " + this.getText("submitty_login"),
                 this.getTheme().CAL_BACKGROUND(), this.getTheme().REFRESH_BUTTON(), this.getTheme().HOVER_OVER_REFRESH());
         refreshButton.addActionListener(e -> this.setUpForAccess());
 
         // Implement the title bar
-        JToolBar titleBar = mainFactory.createToolbar();
+        JToolBar titleBar = DeadlineCountdownFactory.createToolbar();
         titleBar.setBackground(this.getTheme().CAL_BACKGROUND());
         titleBar.setPreferredSize(new Dimension(0, (int) prevMonthButton.getPreferredSize().getHeight()));
         titleBar.add(prevMonthButton);
@@ -184,22 +239,23 @@ public class GUIViewer extends JFrame {
         this.sideBar.setMinimumSize(new Dimension(400, 0));
 
         // settings toolbar
-        JToolBar settingsToolbar = mainFactory.createToolbar();
+        JToolBar settingsToolbar = DeadlineCountdownFactory.createToolbar();
         settingsToolbar.setPreferredSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 55));
         settingsToolbar.setBackground(this.getTheme().SIDEBAR_BACKGROUND());
 
-        JButton saveButton = mainFactory.createSettingsToolbarButton("/images/icon_save.png",
+        JButton saveButton = DeadlineCountdownFactory.createSettingsToolbarButton("/images/icon_save.png",
                 this.getTheme().SIDEBAR_BACKGROUND(), this.getTheme().SIDEBAR_TEXT(), this.getTheme().SIDEBAR_HOVER());
 
-        saveButton.addMouseListener(mainFactory.createButtonActionLoadSave("SAVE", this, this.controller));
+        UIManager.put("OptionPane.buttonFont", new Font(ViewerFont.XHEI, Font.PLAIN, 14));
+        saveButton.addMouseListener(DeadlineCountdownFactory.createButtonActionLoadSave("SAVE", this, this.controller));
         saveButton.setToolTipText(this.getText("save_tooltip"));
 
-        JButton loadButton = mainFactory.createSettingsToolbarButton("/images/icon_load.png",
+        JButton loadButton = DeadlineCountdownFactory.createSettingsToolbarButton("/images/icon_load.png",
                 this.getTheme().SIDEBAR_BACKGROUND(), this.getTheme().SIDEBAR_TEXT(), this.getTheme().SIDEBAR_HOVER());
-        loadButton.addMouseListener(mainFactory.createButtonActionLoadSave("LOAD", this, this.controller));
+        loadButton.addMouseListener(DeadlineCountdownFactory.createButtonActionLoadSave("LOAD", this, this.controller));
         loadButton.setToolTipText(this.getText("load_tooltip"));
 
-        JButton filterButton = mainFactory.createSettingsToolbarButton("/images/icon_filter.png",
+        JButton filterButton = DeadlineCountdownFactory.createSettingsToolbarButton("/images/icon_filter.png",
                 this.getTheme().SIDEBAR_BACKGROUND(), this.getTheme().SIDEBAR_TEXT(), this.getTheme().SIDEBAR_HOVER());
         filterButton.addMouseListener(new MouseAdapter() {
             /**
@@ -213,13 +269,13 @@ public class GUIViewer extends JFrame {
             @Override
             public void mouseReleased(MouseEvent e) {
                 super.mouseReleased(e);
-                sideBar.updatePastDeadlineBox(true);
+                sideBar.updatePastDeadlineBox(controller.getSettings().isShowPastDeadlines());
                 sideBar.showPanel(SideBarPanel.PANEL.COURSE_PANEL);
             }
         });
         filterButton.setToolTipText(this.getText("course_tooltip"));
 
-        JButton listButton = mainFactory.createSettingsToolbarButton("/images/icon_list.png",
+        JButton listButton = DeadlineCountdownFactory.createSettingsToolbarButton("/images/icon_list.png",
                 this.getTheme().SIDEBAR_BACKGROUND(), this.getTheme().SIDEBAR_TEXT(), this.getTheme().SIDEBAR_HOVER());
         listButton.addMouseListener(new MouseAdapter() {
             /**
@@ -238,8 +294,23 @@ public class GUIViewer extends JFrame {
         });
         listButton.setToolTipText(this.getText("deadline_tooltip"));
 
-        JButton settingsButton = mainFactory.createSettingsToolbarButton("/images/icon_settings.png",
+        JButton settingsButton = DeadlineCountdownFactory.createSettingsToolbarButton("/images/icon_settings.png",
                 this.getTheme().SIDEBAR_BACKGROUND(), this.getTheme().SIDEBAR_TEXT(), this.getTheme().SIDEBAR_HOVER());
+        settingsButton.addMouseListener(new MouseAdapter() {
+            /**
+             * {@inheritDoc}
+             * Invoked when a mouse button has been pressed on a component.
+             * @param e the mouse event
+             * @requires None
+             * @modifies None
+             * @effects let the side bar show the settings panel
+             */
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                super.mouseReleased(e);
+                sideBar.showPanel(SideBarPanel.PANEL.SETTINGS_PANEL);
+            }
+        });
         settingsButton.setToolTipText(this.getText("settings_tooltip"));
 
         settingsToolbar.add(listButton);
@@ -252,9 +323,9 @@ public class GUIViewer extends JFrame {
         // configure the sidebar border
         JPanel sideBarWIthInsets = new JPanel(new BorderLayout());
         sideBarWIthInsets.add(this.sideBar, BorderLayout.CENTER);
-        sideBarWIthInsets.add(mainFactory.createPanel(10, 10, true), BorderLayout.NORTH);
-        sideBarWIthInsets.add(mainFactory.createPanel(10, 10, true), BorderLayout.EAST);
-        sideBarWIthInsets.add(mainFactory.createPanel(10, 10, true), BorderLayout.WEST);
+        sideBarWIthInsets.add(DeadlineCountdownFactory.createPanel(10, 10, true), BorderLayout.NORTH);
+        sideBarWIthInsets.add(DeadlineCountdownFactory.createPanel(10, 10, true), BorderLayout.EAST);
+        sideBarWIthInsets.add(DeadlineCountdownFactory.createPanel(10, 10, true), BorderLayout.WEST);
         sideBarWIthInsets.add(settingsToolbar, BorderLayout.SOUTH);
         sideBarWIthInsets.setBackground(this.getTheme().SIDEBAR_BACKGROUND());
         this.getContentPane().add(sideBarWIthInsets, BorderLayout.WEST);
@@ -297,15 +368,20 @@ public class GUIViewer extends JFrame {
             try {
                 this.controller.access(this.username, password);
             } catch (SubmittyAccess.LoginFailException e) {
-                System.out.println("DEBUG: [SetUpAccess] " + e.getMessage());
+                Log.debug("DEBUG: [SetUpAccess] " + e.getMessage());
                 message = this.getText("password_incorrect");
+                passwordNeeded = true;
+            } catch (RuntimeException e) {
+                Log.debug("DEBUG: [SetUpAccess] " + e.getMessage());
+                message = this.getText("login_failed");
                 passwordNeeded = true;
             }
         }
         // update sideBar and calendar to display all deadlines
         this.refreshDeadlines();
 
-        this.controller.saveToLocal(null, "JSON", false);
+        if (this.controller.getSettings().isAutoSaveAfterRefresh())
+            this.controller.saveToLocal(null, "JSON", false);
     }
 
     /**
@@ -551,10 +627,10 @@ public class GUIViewer extends JFrame {
         this.calendarPanel.addDeadline(deadline);
         this.sideBar.addDeadline(deadline);
         DeadlineTimer timer = new DeadlineTimer(deadline, this.controller);
-        if (!this.controller.isIgnoring(deadline.getCourse())) {
+        if (!this.controller.isIgnoring(deadline.getCourseName())) {
             timer.start();
         }
-        this.allTimersMap.put(deadline.getCourse() + deadline.getName(), timer);
+        this.allTimersMap.put(deadline.getCourseName() + deadline.getName(), timer);
     }
 
     /**
@@ -604,7 +680,11 @@ public class GUIViewer extends JFrame {
      * @effects send a message
      */
     public void notification(String title, String message, String subtitle) {
-        this.notification.send(title, message, subtitle);
+        if (this.controller.getSettings().isNotificationEnabled()) {
+            this.notification.send(title, message, subtitle);
+        } else {
+            Log.debug("DEBUG: [GUIController] Notification disabled: " + message);
+        }
     }
 
     /**
@@ -636,8 +716,8 @@ public class GUIViewer extends JFrame {
             if (closest == null) {
                 message = "No incoming due dates";
             } else {
-                message = closest.getName() + " (" + closest.getCourse() + ") " + this.getText("due_in")
-                        + this.getTextFormat().getRemainingText(closest, DateTime.now(), false);
+                message = closest.getName() + " (" + closest.getCourseName() + ") " + this.getText("due_in")
+                        + this.getTextFormat().getRemainingText(closest, CalendarWrapper.now(), false);
             }
             this.notification("main is running in background.", message, "");
         } else {
@@ -695,7 +775,7 @@ public class GUIViewer extends JFrame {
      */
     void showFront() {
         SwingUtilities.invokeLater(() -> {
-            System.out.println("DEBUG: [toFront]");
+            Log.debug("DEBUG: [toFront]");
             setVisible(true);
             setExtendedState(JFrame.NORMAL);
             toFront();
@@ -711,6 +791,7 @@ public class GUIViewer extends JFrame {
      * @effects shutdown the program
      */
     public void shutdown() {
+        this.controller.saveSettings(false);
         this.notification.close();
     }
 }

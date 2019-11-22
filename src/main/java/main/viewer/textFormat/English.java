@@ -102,9 +102,9 @@ public class English extends BaseText {
      */
     @Override
     @SuppressWarnings("Duplicates")
-    public String getRemainingText(Deadline deadline, DateTime currentTime, boolean showIndicator) {
-        if (currentTime == null) currentTime = new DateTime();
-        Pair<Period, Boolean> remain = deadline.getRemainPeriod(new CalendarWrapper(currentTime.getYear(), currentTime.getMonthOfYear(), currentTime.getDayOfMonth(), currentTime.getHourOfDay(), currentTime.getMinuteOfDay()));
+    public String getRemainingText(Deadline deadline, CalendarWrapper currentTime, boolean showIndicator) {
+        if (currentTime == null) currentTime = CalendarWrapper.now();
+        Pair<Period, Boolean> remain = deadline.getRemainPeriod(currentTime);
         Period pd = remain.getKey();
         String month;
         if (pd.getMonths() > 0) {

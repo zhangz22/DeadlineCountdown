@@ -2,12 +2,16 @@ package main.viewer.util;
 
 import model.CalendarWrapper;
 import model.Deadline;
+import main.viewer.Log;
 import main.controller.GUIController;
 import org.joda.time.Period;
 
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.util.LinkedList;
+
+import static main.viewer.Log.ANSI_GREEN;
+import static main.viewer.Log.ANSI_YELLOW;
 
 /**
  * This class represents the timer tasks that sets for each deadline to send notifications
@@ -65,7 +69,7 @@ public class DeadlineTimer {
         this.timers.add(Timer15);
         this.timers.add(TimerHour);
         this.timers.add(TimerDay);
-        System.out.println("DEBUG: [DeadlineTimer] {" + this.deadline + "} timer threads initialized.");
+        Log.debug("DEBUG: [DeadlineTimer] {" + this.deadline + "} timer threads initialized.");
     }
 
     /**
@@ -75,10 +79,10 @@ public class DeadlineTimer {
      * @effects send a notification
      */
     private void sendNotification() {
-        String message = this.deadline.getCourse() + ": " + this.deadline.getName() + " " +
+        String message = this.deadline.getCourseName() + ": " + this.deadline.getName() + " " +
                 parent.getFrame().getText("due_in") + " " + parent.getFrame().getTextFormat().getRemainingText(this.deadline, null, false);
-        System.out.println("DEBUG: [DeadlineTimer] " + message);
-        if (!parent.isIgnoring(this.deadline.getCourse()))
+        Log.debug("DEBUG: [DeadlineTimer] " + message);
+        if (!parent.isIgnoring(this.deadline.getCourseName()))
             parent.notification(parent.getFrame().getText("notification_title_deadline_approach"), message,"");
     }
 
@@ -140,7 +144,7 @@ public class DeadlineTimer {
             return;
         }
         this.isRunning = true;
-        System.out.println("DEBUG: [DeadlineTimer] {" + this.deadline + "} timer threads started.");
+        Log.debug("DEBUG: [DeadlineTimer] {" + this.deadline + "} timer threads started.", ANSI_GREEN);
         for (Timer t: this.timers) {
             t.start();
         }
@@ -157,7 +161,7 @@ public class DeadlineTimer {
             return;
         }
         this.isRunning = false;
-        System.out.println("DEBUG: [DeadlineTimer] {" + this.deadline + "} timer threads stopped.");
+        Log.debug("DEBUG: [DeadlineTimer] {" + this.deadline + "} timer threads stopped.", ANSI_YELLOW);
         for (Timer t: this.timers) {
             t.stop();
         }
@@ -173,6 +177,7 @@ public class DeadlineTimer {
      */
     private boolean shouldStop() {
         return this.deadline.isBefore(CalendarWrapper.now()) ||
-                this.parent.isIgnoring(this.deadline.getCourse());
+                this.deadline.getStatus().equals(Deadline.STATUS.FINISHED) ||
+                this.parent.isIgnoring(this.deadline.getCourseName());
     }
 }

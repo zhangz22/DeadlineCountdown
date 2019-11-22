@@ -1,5 +1,6 @@
 package main.viewer.textFormat;
 
+import model.CalendarWrapper;
 import model.Deadline;
 import org.joda.time.DateTime;
 
@@ -172,5 +173,5 @@ public abstract class BaseText {
      * @effects None
      * @return a string to represent the remaining time to a given deadline
      */
-    public abstract String getRemainingText(Deadline deadline, DateTime currentTime, boolean showIndicator);
+    public abstract String getRemainingText(Deadline deadline, CalendarWrapper currentTime, boolean showIndicator);
 }

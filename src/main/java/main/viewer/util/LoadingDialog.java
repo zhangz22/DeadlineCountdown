@@ -2,7 +2,8 @@ package main.viewer.util;
 
 import main.controller.GUIController;
 import main.viewer.calendarPanel.TitleButton;
-import main.viewer.mainFactory;
+import main.viewer.DeadlineCountdownFactory;
+import main.viewer.textFormat.ViewerFont;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -39,6 +40,7 @@ public class LoadingDialog extends JDialog {
 
         // progress
         this.currProgressLabel = new JLabel("Accessing Submitty...");
+        this.currProgressLabel.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 16));
         this.currProgressLabel.setOpaque(false);
 
         String loadingText = parent.getFrame().getText("submitty_loading");
@@ -72,6 +74,7 @@ public class LoadingDialog extends JDialog {
         } else {
             loadingLabel = new JLabel("  " + loadingText + "  ");
         }
+        loadingLabel.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 22));
         labelPanel.setPreferredSize(new Dimension(250,55));
         labelPanel.add(loadingLabel);
         if (loadingProgress != null) {
@@ -84,7 +87,7 @@ public class LoadingDialog extends JDialog {
         progressPanel.add(currProgressLabel, BorderLayout.CENTER);
         loadingPanel.add(progressPanel, BorderLayout.SOUTH);
 
-        JToolBar title = mainFactory.createToolbar();
+        JToolBar title = DeadlineCountdownFactory.createToolbar();
         JButton close = new TitleButton("✖",
                 parent.getFrame().getTheme().CAL_BACKGROUND(), parent.getFrame().getTheme().SIDEBAR_BACKGROUND(),
                 parent.getFrame().getTheme().HOVER_OVER_CAL());

@@ -4,7 +4,8 @@ import javafx.util.Pair;
 import model.Course;
 import model.Deadline;
 import main.controller.GUIController;
-import main.viewer.mainFactory;
+import main.viewer.DeadlineCountdownFactory;
+import main.viewer.Log;
 
 import javax.swing.*;
 import java.io.File;
@@ -40,30 +41,30 @@ public class DeadlineExporter {
      * @effects export deadline
      */
     public void export() {
-        System.out.println("Debug: [" + this.caller + "] {"
+        Log.debug("Debug: [" + this.caller + "] {"
                 + this.deadline.toString() + "} will be exported.");
         // save to
-        JFileChooser fileChooser = mainFactory.createFileChooser(
+        JFileChooser fileChooser = DeadlineCountdownFactory.createFileChooser(
                 this.deadline.getName(),
                 this.mainmain.getFrame().getTextResource());
         int result = fileChooser.showSaveDialog(this.mainmain.getFrame());
 
         if (result == JFileChooser.APPROVE_OPTION) {
-            Pair<File, String> choice = mainFactory.getFileFromFileChooser(fileChooser);
+            Pair<File, String> choice = DeadlineCountdownFactory.getFileFromFileChooser(fileChooser);
             if (choice == null) return;
             File file = choice.getKey();
             String extSelected = choice.getValue();
 
             if (file == null) {
-                System.out.println("Debug: [" + this.caller + "] trying to export to a null file.");
+                Log.debug("Debug: [" + this.caller + "] trying to export to a null file.");
                 this.mainmain.notification(
                         this.mainmain.getFrame().getText("export_failed"), "", "");
                 return;
             }
-            System.out.println("Debug: [" + this.caller + "] "
+            Log.debug("Debug: [" + this.caller + "] "
                     + deadline.toString() + " will be exported to " + file.getName());
             ConcurrentHashMap<String, Course> courseMap = new ConcurrentHashMap<>();
-            Course currCourse = new Course(this.deadline.getCourse());
+            Course currCourse = new Course(this.deadline.getCourseName());
             currCourse.addDeadline(this.deadline);
             courseMap.put(currCourse.getCourseName(), currCourse);
             if (!file.isDirectory()) {
@@ -80,11 +81,19 @@ public class DeadlineExporter {
                     return;
                 }
                 // save local files
+                if (this.mainmain.getSettings().isSaveLocalUnavailable()) {
+                    Log.error("DEBUG: [" + caller + "] Settings return " +
+                            "'isSaveLocalUnavailable'");
+                    this.mainmain.notification(this.mainmain.getFrame().getText("export_failed"),
+                            this.mainmain.getFrame().getText("export_access_denied") + "\n" +
+                            this.mainmain.getFrame().getText("export_please_restart"),"");
+                    return;
+                }
                 localParser.Parser save = new localParser.Save(courseMap, writer);
                 Thread thread = localParser.Parser.getParserThread(save, extSelected, this.mainmain, true);
                 thread.run();
             } else {
-                System.out.println("Debug: [" + this.caller + "] trying to export to a directory file.");
+                Log.debug("Debug: [" + this.caller + "] trying to export to a directory file.");
                 this.mainmain.notification(this.mainmain.getFrame().getText("export_failed"),
                         file.getName() + " " + this.mainmain.getFrame().getText("export_is_directory"),
                         "");

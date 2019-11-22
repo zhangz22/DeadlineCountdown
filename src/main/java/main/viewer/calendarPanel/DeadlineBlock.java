@@ -4,6 +4,8 @@ import model.CalendarWrapper;
 import model.Deadline;
 import main.viewer.*;
 import main.viewer.util.DeadlineExporter;
+import main.viewer.textFormat.ViewerFont;
+import main.viewer.util.Webpage;
 
 import javax.swing.*;
 import java.awt.Color;
@@ -35,25 +37,83 @@ class DeadlineBlock extends JTextArea implements DeadlineBlockInterface {
 
         // set color based on the status of the deadline
         this.setEnabled(false);
+        if (deadline.getStatus() == null) {
+            this.setBackground(parent.getTheme().SUBMIT_COLOR());
+        } else {
+            this.setDisabledTextColor(Color.WHITE);
+            switch (deadline.getStatus()) {
+                case Deadline.STATUS.LATE_SUBMIT:
+                    this.setBackground(parent.getTheme().LATE_SUBMIT_COLOR());
+                    break;
+                case Deadline.STATUS.FINISHED:
+                    this.setBackground(parent.getTheme().FINISH_COLOR());
+                    break;
+                case Deadline.STATUS.RESUBMIT:
+                    if (deadline.getYear() == CalendarWrapper.now().getYear()
+                            && deadline.getMonth() == CalendarWrapper.now().getMonth()
+                            && deadline.getDay() == CalendarWrapper.now().getDay()) {
+                        this.setBackground(parent.getTheme().RESUBMIT_COLOR_TODAY());
+                    } else {
+                        this.setBackground(parent.getTheme().RESUBMIT_COLOR());
+                    }
+                    break;
+                case Deadline.STATUS.OVERDUE_SUBMISSION:
+                case Deadline.STATUS.LATE_RESUBMIT:
+                    this.setBackground(parent.getTheme().RESUBMIT_COLOR());
+                    break;
+                case Deadline.STATUS.NO_SUBMISSION:
+                    this.setBackground(parent.getTheme().NO_SUBMISSION_TODAY());
+                    break;
+                default:
+                    this.setBackground(parent.getTheme().SUBMIT_COLOR());
+                    break;
+            }
+        }
 
         // set font
         this.setDisabledTextColor(Color.WHITE);
+        this.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 14));
         this.setAlignmentX(Component.LEFT_ALIGNMENT);
         this.setMargin(new Insets(2, 5, 2, 2));
         super.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
 
         // set tool tip message: course name + deadline name + special status
-        String tooltipText = "<html>" + deadline.getCourse() + ":<br>" + deadline.getName() + "<br>(due "
+        String tooltipText = "<html>" + deadline.getCourseName() + ":<br>" + deadline.getName() + "<br>(due "
                 + CalendarWrapper.getTimeStr(deadline.getYear(), deadline.getMonth(), deadline.getDay(), deadline.getHour(), deadline.getMinute()) + ")";
+        if (this.deadline.getStatus() != null && !this.deadline.getStatus().equals("SUBMIT")) {
+            tooltipText += ("<br>(" + this.deadline.getStatus() + ")");
+        }
         tooltipText += "</html>";
         super.setToolTipText(tooltipText);
 
         // right-click menu
-        JPopupMenu menu = mainFactory.createDeadlineBlockRightMenu(this,
+        JPopupMenu menu = DeadlineCountdownFactory.createDeadlineBlockRightMenu(this,
                 parent.getMainmainGUI().getFrame().getTheme().SIDEBAR_TEXT(),
                 parent.getMainmainGUI().getFrame().getTheme().SIDEBAR_BACKGROUND());
         this.setComponentPopupMenu(menu);
-        this.addMouseListener(mainFactory.createRightClickMenuAction(menu));
+        this.addMouseListener(DeadlineCountdownFactory.createRightClickMenuAction(menu));
+        if (!this.deadline.getLink().equals("")) {
+            this.addMouseListener(new MouseAdapter() {
+                /**
+                 * {@inheritDoc}
+                 * Invoked when a mouse button has been pressed on a component.
+                 *
+                 * @param e the mouse event
+                 * @requires None
+                 * @modifies None
+                 * @effects open the link
+                 */
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    super.mousePressed(e);
+                    if (e.getClickCount() == 2 && !e.isConsumed()) {
+                        e.consume();
+                        // handle double click event
+                        Webpage.open(deadline.getLink());
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -65,7 +125,7 @@ class DeadlineBlock extends JTextArea implements DeadlineBlockInterface {
      */
     @Override
     public String getCourseName() {
-        return this.deadline.getCourse();
+        return this.deadline.getCourseName();
     }
 
     /**
