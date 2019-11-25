@@ -332,7 +332,7 @@ public class CalendarWrapper implements Cloneable, Comparable<CalendarWrapper>  
     @Override
     public int compareTo(CalendarWrapper o) {
         Calendar self = (Calendar) this.cal.clone();
-        Calendar other = (Calendar) this.cal.clone();
+        Calendar other = (Calendar) o.cal.clone();
         self.set(Calendar.SECOND, 0);
         self.set(Calendar.MILLISECOND, 0);
         other.set(Calendar.SECOND, 0);
