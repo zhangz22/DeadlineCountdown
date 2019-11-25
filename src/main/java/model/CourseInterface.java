@@ -64,13 +64,15 @@ public interface CourseInterface extends Cloneable {
      * @param day the day number of a month
      * @param hour the hour number of a day
      * @param minute the minute number of an hour
+     * @param status       the status of this deadline
+     * @param link         the link to the project
      * @requires deadlineName != null
      * @modifies Deadlines
      * @effects add a new deadline object to the Deadlines map
      * @throws CalendarWrapper.CalendarFormatException  of the number of date is invalid
      */
     void addDeadline(String deadlineName, int year, int month,
-                            int day, int hour, int minute);
+                            int day, int hour, int minute, String status, String link);
 
     /**
      * This function will add all deadlines from another course object to current

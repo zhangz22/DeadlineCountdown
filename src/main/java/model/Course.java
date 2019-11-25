@@ -112,6 +112,8 @@ public class Course implements CourseInterface {
      * @param day the day number of a month
      * @param hour the hour number of a day
      * @param minute the minute number of an hour
+     * @param status       the status of this deadline
+     * @param link         the link to the project
      * @requires deadlineName != null
      * @modifies Deadlines
      * @effects add a new deadline object to the Deadlines map
@@ -119,10 +121,10 @@ public class Course implements CourseInterface {
      */
     @Override
     public void addDeadline(String deadlineName, int year, int month,
-                            int day, int hour, int minute)
+                            int day, int hour, int minute, String status, String link)
             throws CalendarWrapper.CalendarFormatException  {
         Deadline d = new Deadline(year, month, day, hour, minute, deadlineName,
-                this.courseName);
+                this.courseName, status, link);
         deadlines.put(deadlineName,d);
     }
 

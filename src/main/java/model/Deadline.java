@@ -174,7 +174,7 @@ public final class Deadline implements DeadlineInterface, Comparable<Deadline> {
      * @return the course name
      */
     @Override
-    public String getCourse() {
+    public String getCourseName() {
         return courseName;
     }
 
@@ -371,22 +371,18 @@ public final class Deadline implements DeadlineInterface, Comparable<Deadline> {
      * than, equal to, or greater than the specified object.
      *
      * @param o the object to be compared.
-     * @return a negative integer, zero, or a positive integer as this object
-     * is less than, equal to, or greater than the specified object.
+     * @return a negative integer, zero, or a positive integer as this current deadline
+     * is earlier than, equal to, or latter than the specified deadline.
      * @throws NullPointerException if the specified object is null
-     * @throws ClassCastException   if the specified object's type prevents it
-     *                              from being compared to this object.
      */
     @Override
     public int compareTo(Deadline o) {
-        // TODO compareTo testing needed
-        if (this.date.equals(o.date)) {
-            return 0;
-        }
-        if (!this.date.isAfter(o.date)) {
+        if (this.isBefore(CalendarWrapper.now()) && o.isAfter(CalendarWrapper.now())){
+            return 1;
+        } else if (this.isAfter(CalendarWrapper.now()) && o.isBefore(CalendarWrapper.now())) {
             return -1;
         }
-        return 1;
+        return this.date.compareTo(o.date);
     }
 
     /**

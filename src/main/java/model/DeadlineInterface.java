@@ -74,7 +74,7 @@ public interface DeadlineInterface extends Cloneable {
      * @effects None
      * @return the course name
      */
-    String getCourse();
+    String getCourseName();
 
     /**
      * This function returns the date of this deadline
