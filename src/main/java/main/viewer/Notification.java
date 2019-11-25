@@ -1,10 +1,8 @@
 package main.viewer;
 
-import com.sun.javafx.runtime.SystemProperties;
+import model.CalendarWrapper;
 import model.Deadline;
-import main.controller.AbstractController;
 import main.controller.GUIController;
-import org.joda.time.DateTime;
 
 import javax.swing.*;
 import java.awt.AWTException;
@@ -96,6 +94,7 @@ public class Notification {
         MenuItem closeMenu = new MenuItem("Close main");
         closeMenu.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+				    parent.saveSettings(false);
 				    close();
 					System.exit(0);
 				}
@@ -129,7 +128,7 @@ public class Notification {
             if (parent instanceof GUIController) {
                 ((GUIController) parent).alert("<html>" + title + "<br>" + message + "</html>");
             } else {
-                System.out.println(title + System.getProperty("line.separator") + message);
+                ConsoleDebug.debug(title + System.getProperty("line.separator") + message);
             }
         }
     }
@@ -164,7 +163,7 @@ public class Notification {
             Runtime.getRuntime().exec(new String[]
                     { "osascript", "-e", "display notification " + message + " with title " + title + " subtitle " + subtitle + "" });
         } catch (IOException e) {
-            System.err.println("Error sending notifcation on macOS" + e);
+            Log.error("Error sending notifcation on macOS", e);
         }
     }
 
@@ -193,8 +192,8 @@ public class Notification {
             trayIcon.setToolTip("main");
         } else {
             trayIcon.setToolTip(closest.getName() + "\n"
-                    + "(" + closest.getCourse() + "): \n"
-                    + parent.getFrame().getTextFormat().getRemainingText(closest, DateTime.now(), true));
+                    + "(" + closest.getCourseName() + "): \n"
+                    + parent.getFrame().getTextFormat().getRemainingText(closest, CalendarWrapper.now(), true));
         }
     }
 }
