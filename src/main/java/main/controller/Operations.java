@@ -33,6 +33,21 @@ public interface Operations {
     void saveToLocal(File file, String extension);
 
     /**
+     * This method should ask the user to agree with following statement:
+     * I acknowledge that this program will not save my username and
+     * password in any form after the program terminates and will not
+     * use my username and password for any use other than grabbing deadline
+     * dates. I understand that I should take my own risk using this
+     * program.
+     *
+     * @return the user's choice
+     * @requires None
+     * @modifies None
+     * @effects None
+     */
+    boolean agreement();
+
+    /**
      * This method would try to access web pages via the id and password that the
      * user provided
      * @param id the user id
@@ -53,12 +68,14 @@ public interface Operations {
      * @param day the day number; starts from 1 to 31
      * @param hour the hour number
      * @param minute the minute number
+     * @param status       the status of this deadline
+     * @param link         the link to the project
      * @requires None
      * @modifies a list that stores every course and their information
      * @effects None
      */
     void addDeadline(String course, String deadlineName, int year, int month,
-                            int day, int hour, int minute);
+                     int day, int hour, int minute, String status, String link);
 
     /**
      * This method would remove a deadline from an existing course.

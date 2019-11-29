@@ -2,14 +2,13 @@ package webService;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.SilentCssErrorHandler;
+import com.gargoylesoftware.htmlunit.WebClient;
 import com.sun.istack.internal.NotNull;
+import main.viewer.Log;
 import model.CalendarWrapper;
 import model.Course;
 import model.Deadline;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import javax.swing.*;
@@ -76,7 +75,15 @@ public class SubmittyAccess {
         // Notice that the remainder of the code relies on the interface,
         // not the implementation.
         final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:25.0) Gecko/20160101 Firefox/66.0";
-        driver = new SilentHtmlUnitDriver(BrowserVersion.FIREFOX_38);
+        System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
+        driver = new SilentHtmlUnitDriver(BrowserVersion.FIREFOX_38) {
+            @Override
+            protected WebClient newWebClient(BrowserVersion version) {
+                WebClient webClient = super.newWebClient(version);
+                webClient.getOptions().setUseInsecureSSL(true);
+                return webClient;
+            }
+        };
         this.user_id = user_id;
         this.password = password;
         this.courseList = new ConcurrentHashMap<>();
@@ -103,7 +110,11 @@ public class SubmittyAccess {
         }
 
         // And now use this to visit Submitty
-        driver.get("https://submitty.cs.rpi.edu/home");
+        try {
+            driver.get("https://submitty.cs.rpi.edu/home");
+        } catch (WebDriverException e) {
+            throw new LoginFailException(e.getMessage());
+        }
 
         // Find the text input element by its name
         WebElement IdElement = driver.findElement(By.name("user_id"));
@@ -149,7 +160,8 @@ public class SubmittyAccess {
             System.err.println("DEBUG: [accessDriver] Parsing current course " + courseName);
 
             // generate a course object
-            Course currCourse = new Course(courseName.replace("Spring 2019", "").trim());
+            Course currCourse = new Course(courseName.replace("Fall 2019", "").trim());
+
             // Get information about current course
             currCourseBtn.click();
             List<WebElement> DeadlineList = driver.findElements(By.className("btn-nav-submit"));
@@ -165,6 +177,47 @@ public class SubmittyAccess {
                     continue;
                 String id = gradeable.getAttribute("id");
 
+                String status;
+                if (text.contains("LATE SUBMIT")) {
+                    status = Deadline.STATUS.LATE_SUBMIT;
+                } else if (text.contains("LATE RESUBMIT")) {
+                    status = Deadline.STATUS.LATE_RESUBMIT;
+                } else if (text.contains("RESUBMIT")) {
+                    status = Deadline.STATUS.RESUBMIT;
+                } else if (text.contains("OVERDUE SUBMISSION")) {
+                    status = Deadline.STATUS.OVERDUE_SUBMISSION;
+                } else if (text.contains("NO SUBMISSION")) {
+                    status = Deadline.STATUS.NO_SUBMISSION;
+                } else if (text.contains("MUST BE ON A TEAM")) {
+                    status = Deadline.STATUS.MUST_ON_TEAM;
+                } else {
+                    status = Deadline.STATUS.DEFAULT;
+                }
+                // progress
+                if (status.equals(Deadline.STATUS.RESUBMIT)) {
+                    try {
+                        String progressStr = gradeable.findElement(By.xpath("../div[contains(@class, 'meter')]/span")).getAttribute("style");
+                        if (progressStr.startsWith("width: ")) {
+                            int progress = Integer.valueOf(progressStr.replace("width: ", "").replace("%", ""));
+                            if (progress == 100) {
+                                status = Deadline.STATUS.FINISHED;
+                            }
+                        }
+                    } catch (NoSuchElementException e) {
+                        Log.error("DEBUG: [accessDriver] Deadline " + text + " for " + courseName + " contains no width");
+                    }
+                }
+                String link;
+                try {
+                    link = gradeable.getAttribute("href");
+                } catch (NoSuchElementException e) {
+                    Log.debug("DEBUG: [accessDriver] Deadline " + text + " for " + courseName + " contains no link");
+                    link = "";
+                }
+                if (link == null) {
+                    // the attribute's href value is null if the value is not set
+                    link = "";
+                }
 
                 String name = text.replace("REGRADE","")
                         .replace("VIEW GRADE","")
@@ -191,7 +244,7 @@ public class SubmittyAccess {
                                     replace("MANAGE TEAM", "").
                                     replace("CREATE/JOIN TEAM", "");
                             String createTeamName = name + " (MANAGE TEAM)";
-                            Deadline teamDue = new Deadline(teamDueDate, createTeamName, currCourse.getCourseName());
+                            Deadline teamDue = new Deadline(teamDueDate, createTeamName, currCourse.getCourseName(), status, link);
                             currCourse.addDeadline(teamDue);
                         } catch (CalendarWrapper.CalendarFormatException  ept) {
                             System.err.println("Due date format not correct: " + textArr[1].trim());
@@ -202,7 +255,7 @@ public class SubmittyAccess {
                     WebElement due = gradeable.findElement(By.className("subtitle"));
                     String dueText = due.getText();
                     CalendarWrapper currDueDate = Deadline.parseDate(dueText);
-                    Deadline currDue = new Deadline(currDueDate, name, currCourse.getCourseName());
+                    Deadline currDue = new Deadline(currDueDate, name, currCourse.getCourseName(), status, link);
                     System.err.println("DEBUG: [accessDriver] Adding " + currDue.toString());
                     currCourse.addDeadline(currDue);
                 } catch (NoSuchElementException ept) {

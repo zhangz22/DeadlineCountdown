@@ -1,15 +1,23 @@
 package main.controller;
 
-import javafx.util.Pair;
 import model.CalendarWrapper;
 import model.Course;
 import model.Deadline;
+import main.viewer.Log;
 import webService.SubmittyAccess;
+import javafx.util.Pair;
 
-import javax.swing.*;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import javax.swing.SwingUtilities;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TreeMap;
@@ -19,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.lang.System.exit;
 
 /**
- * This class is the controller of the command-line version of Deadline Countdown.
+ * This class is the controller of the command-line version of main.
  * This class uses System.out as the View
  */
 public class CommandLineController extends AbstractController implements Operations {
@@ -69,7 +77,7 @@ public class CommandLineController extends AbstractController implements Operati
 
     /**
      * This method should ask the user to agree with following statement:
-     * I acknowledge that DeadlineCountdown will not save my id and
+     * I acknowledge that main will not save my id and
      * password in any form after the program terminates and will not
      * use my id and password for any use other than grabbing deadline
      * dates. I understand that I should take my own risk using this
@@ -79,13 +87,14 @@ public class CommandLineController extends AbstractController implements Operati
      * @effects None
      * @return the user's choice
      */
+    @Override
     public boolean agreement() {
         return Agreement(false);
     }
 
     /**
      * This method should ask the user to agree with following statement:
-     * I acknowledge that DeadlineCountdown will not save my id and
+     * I acknowledge that main will not save my id and
      * password in any form after the program terminates and will not
      * use my id and password for any use other than grabbing deadline
      * dates. I understand that I should take my own risk using this
@@ -101,7 +110,7 @@ public class CommandLineController extends AbstractController implements Operati
      */
     private boolean Agreement(boolean defaultChoice) {
         System.out.println("Term of agreement");
-        System.out.print("I acknowledge that DeadlineCountdown will not save my id and " +
+        System.out.print("I acknowledge that main will not save my id and " +
                 "password \nin any form after the program terminates and will not " +
                 "use my \nid and password for any use other than grabbing deadline " +
                 "dates. \nI understand that I should take my own risk using this " +
@@ -152,12 +161,7 @@ public class CommandLineController extends AbstractController implements Operati
         if (console == null) {
             final JPasswordField jpf = new JPasswordField();
             JOptionPane jop = new JOptionPane(jpf, JOptionPane.QUESTION_MESSAGE,
-                    JOptionPane.OK_CANCEL_OPTION) {
-                @Override
-                public void selectInitialValue() {
-                    jpf.requestFocusInWindow();
-                }
-            };
+                    JOptionPane.OK_CANCEL_OPTION);
             JDialog dialog = jop.createDialog("Enter the password: ");
             dialog.addComponentListener(new ComponentAdapter() {
                 @Override
@@ -178,7 +182,6 @@ public class CommandLineController extends AbstractController implements Operati
             } catch (NullPointerException e) {
                 exit(1);
             }
-
             char[] passwordArray = null;
             if (result == JOptionPane.OK_OPTION) {
                 passwordArray = jpf.getPassword();
@@ -244,19 +247,20 @@ public class CommandLineController extends AbstractController implements Operati
      * @param day the day number; starts from 1 to 31
      * @param hour the hour number
      * @param minute the minute number
+     * @param status the status of this deadline
+     * @param link the link to the project
      * @requires None
      * @modifies a list that stores every course and their information
      * @effects None
-     * @throws CalendarWrapper.CalendarFormatException
      */
     @Override
     public void addDeadline(String course, String deadlineName, int year, int month,
-                            int day, int hour, int minute) {
-        Course c = getCourseByName(course);
+                            int day, int hour, int minute, String status, String link) {
+        Course c =getCourseByName(course);
         try {
-            c.addDeadline(deadlineName, year, month, day, hour, minute);
-        } catch (CalendarWrapper.CalendarFormatException  e) {
-            System.err.println("Due date format not correct:" + e.getMessage());
+            c.addDeadline(deadlineName, year, month, day, hour, minute, status, link);
+        } catch (CalendarWrapper.CalendarFormatException e) {
+            Log.debug("Due date format not correct:" + e.getMessage());
             e.printStackTrace();
             return;
         }
@@ -277,10 +281,10 @@ public class CommandLineController extends AbstractController implements Operati
      */
     @Override
     public void removeDeadline(String course, String deadlineName, int year, int month, int day) {
-        /* This feature is not supported in the command-line version of DeadlineCountdown
+        /* This feature is not supported in the command-line version of main
          * since the output of System.out is immutable
          */
-        Course c = getCourseByName(course);
+        Course c =getCourseByName(course);
         c.removeDeadline(deadlineName);
         allCourses.put(course, c);
     }
@@ -334,6 +338,7 @@ public class CommandLineController extends AbstractController implements Operati
      */
     @Override
     public void run(String[] args) {
+        CalendarWrapper now = CalendarWrapper.now();
         int maxlen = 1;
         for (String i : this.allCourses.keySet()) {
             // iterate through courses
@@ -343,21 +348,21 @@ public class CommandLineController extends AbstractController implements Operati
             List<String> dueList = this.allCourses.get(i).getReversedSortedDeadlines();
             for (String j : dueList) {
                 // iterate through deadlines
-                System.out.println(j.trim() + ": \t\t" + dueMap.get(j).getRemainingText(CalendarWrapper.now()));
-                int currlen = (dueMap.get(j).getCourse().trim() + " " + dueMap.get(j).getName().trim() + ":   ").length();
+                System.out.println(j.trim() + ": \t\t" + dueMap.get(j).getRemainingText(now));
+                int currlen = (dueMap.get(j).getCourseName().trim() + " " + dueMap.get(j).getName().trim() + ":   ").length();
                 if (currlen > maxlen) maxlen = currlen;
             }
         }
         System.out.println("\n\nSUMMARY");
         System.out.println("========================================================");
         for (Deadline d: this.allDeadlines) {
-            System.out.printf("%-"+maxlen+"s", d.getCourse().trim() + " " + d.getName().trim() + ":   ");
-            System.out.println(d.getRemainingText(CalendarWrapper.now()));
+            System.out.printf("%-"+maxlen+"s", d.getCourseName().trim() + " " + d.getName().trim() + ":   ");
+            System.out.println(d.getRemainingText(now));
         }
     }
 
     /**
-     * The main function to run the command line version of DeadlineCountdown
+     * The main function to run the command line version of main
      * @param args command line arguments
      */
     public static void main(String[] args) {
