@@ -4,9 +4,15 @@ import com.sun.istack.internal.NotNull;
 import main.controller.AbstractController;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import main.viewer.Log;
+import biweekly.Biweekly;
+import biweekly.ICalendar;
+import biweekly.component.VEvent;
 import model.Deadline;
 
 import java.io.*;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -100,18 +106,58 @@ public class Load extends Parser {
         }
         return success;
     }
-
-    /**
-     * This method would save data to a local ICS file.
-     *
-     * @requires None
-     * @modifies None
-     * @effects save to / load from local file
-     * @return result: true -> successful; false -> failed
-     */
     @Override
+    @SuppressWarnings("deprecation")
     public synchronized boolean Ics() {
-        throw new RuntimeException("Method not supported");
+        List<ICalendar> icals;
+        try {
+            icals = Biweekly.parse(this.reader).all();
+        } catch (IOException | NullPointerException e) {
+            e.printStackTrace();
+            errMsg = e.getMessage();
+            return false;
+        }
+
+        for (ICalendar ical: icals) {
+            List<VEvent> events = ical.getEvents();
+            for (VEvent event: events) {
+                String names = event.getSummary().getValue();
+                String[] nameList = names.split(": ");
+                String courseName;
+                String deadlineName;
+                if (nameList.length >= 2) {
+                    courseName = nameList[0];
+                    deadlineName = names.replace(courseName + ": ", "");
+                } else {
+                    courseName = "Unknown Course";
+                    deadlineName = nameList[0];
+                }
+                Date d = event.getDateStart().getValue();
+                int year = d.getYear() + 1900;
+                int month = d.getMonth() + 1;
+                int day = d.getDate();
+                int hour = d.getHours();
+                int minute = d.getMinutes();
+                String status, link = "";
+                if (event.getDescription().getValue().startsWith("Status = ")) {
+                    status = event.getDescription().getValue().split("\n")[0].replace("Status = ", "");
+                    if (event.getDescription().getValue().split("\n").length == 2) {
+                        link = event.getDescription().getValue().split("\n")[1].replace("Link = ", "");
+                    }
+                } else {
+                    status = Deadline.STATUS.DEFAULT;
+                    link = "";
+                }
+                parent.addDeadline(courseName, deadlineName, year, month, day, hour, minute, status, link);
+            }
+        }
+
+        try {
+            this.reader.close();
+        } catch (IOException e) {
+            Log.error("[Load] Error when closing file", e);
+        }
+        return true;
     }
 
     /**
@@ -124,6 +170,57 @@ public class Load extends Parser {
      */
     @Override
     public synchronized boolean Csv() {
-        throw new RuntimeException("Method not supported");
+        if (this.reader == null) {
+            return false;
+        }
+        BufferedReader reader = new BufferedReader(this.reader);
+        String str;
+        int i = 0;
+        while (true) {
+            try {
+                str = reader.readLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+                errMsg = e.getMessage();
+                return false;
+            }
+            if (i == 0) {
+                // skip the first line
+                i++;
+                continue;
+            }
+            if (str != null) {
+                String[] parts = str.split(",");
+                if (parts.length < 7) {
+                    continue;
+                }
+                try {
+                    String courseName = parts[0];
+                    String deadlineName = parts[1];
+                    int year = Integer.parseInt(parts[4]);
+                    int month = Integer.parseInt(parts[2]);
+                    int date = Integer.parseInt(parts[3]);
+                    int hour = Integer.parseInt(parts[5]);
+                    int minute = Integer.parseInt(parts[6]);
+                    String status = parts[7];
+                    String link = "";
+                    if (parts.length == 9) {
+                        link = parts[8];
+                    }
+                    parent.addDeadline(courseName, deadlineName, year, month, date, hour, minute, status, link);
+                } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                    Log.error("Error when reading csv file", e);
+                }
+            } else {
+                break;
+            }
+        }
+
+        try {
+            this.reader.close();
+        } catch (IOException e) {
+            Log.error("[Load] Error when closing file", e);
+        }
+        return true;
     }
 }
