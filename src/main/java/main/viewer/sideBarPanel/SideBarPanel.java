@@ -152,6 +152,9 @@ public class SideBarPanel extends JPanel {
         this.addNewDeadlinePanel = new addNewDeadlinePanel(this, true);
         this.editDeadlinePanel = new addNewDeadlinePanel(this, false);
 
+        // settings panel
+        JPanel settingsPanel = new SettingsPanel(parent);
+
         // create upper part
         this.addUpperPartComponents();
 
@@ -162,6 +165,7 @@ public class SideBarPanel extends JPanel {
         this.lowerPart.add(addNewDeadlinePanel, PANEL.ADD_NEW_DEADLINE_PANEL);
         this.lowerPart.add(editDeadlinePanel, PANEL.EDIT_DEADLINE_PANEL);
         this.lowerPart.add(courseScrollPanel, PANEL.COURSE_PANEL);
+        this.lowerPart.add(settingsPanel, PANEL.SETTINGS_PANEL);
         // the lower part: including the summary panel and the addNewDeadline panel
         this.add(this.lowerPart);
 
