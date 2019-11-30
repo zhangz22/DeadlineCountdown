@@ -5,6 +5,7 @@ import org.joda.time.DateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Objects;
+import java.util.TimeZone;
 
 /**
  * @overview
@@ -316,6 +317,48 @@ public class CalendarWrapper implements Cloneable, Comparable<CalendarWrapper>  
     public static CalendarWrapper now() {
         return new CalendarWrapper();
     }
+
+    /**
+     * This function generates a Java Calendar Object
+     *
+     * @param timezone the timezone
+     * @param year  a number indicating a year
+     * @param month a number indicating a month. Starts from 1 as January
+     * @param day a number indicating the day of the month. The first day of the month has value 1.
+     * @param hour a number indicating the hour of the day and is used for the 24-hour clock.
+     * @param minute a number indicating the minute within the hour
+     * @return a Java Calendar Object
+     */
+    public static Calendar createJavaCalendar(TimeZone timezone, int year, int month, int day, int hour, int minute) {
+        Calendar startDate = new GregorianCalendar();
+        if (timezone != null)
+            startDate.setTimeZone(timezone);
+        startDate.set(java.util.Calendar.MONTH, month-1);
+        startDate.set(java.util.Calendar.DAY_OF_MONTH, day);
+        startDate.set(java.util.Calendar.YEAR, year);
+        startDate.set(java.util.Calendar.HOUR_OF_DAY, hour);
+        startDate.set(java.util.Calendar.MINUTE, minute);
+        startDate.set(java.util.Calendar.SECOND, 0);
+        return startDate;
+    }
+
+    /**
+     * This function generates a Java Date Object
+     *
+     * @param year  a number indicating a year
+     * @param month a number indicating a month. Starts from 1 as January
+     * @param day a number indicating the day of the month. The first day of the month has value 1.
+     * @param hour a number indicating the hour of the day and is used for the 24-hour clock.
+     * @param minute a number indicating the minute within the hour
+     * @return a Java Calendar Object
+     */
+    @SuppressWarnings("deprecation")
+    public static java.util.Date createJavaDate(final int year, final int month,
+                                                final int day, final int hour,
+                                                final int minute) {
+        return new java.util.Date(year-1900, month - 1, day, hour, minute);
+    }
+
 
     /**
      * Compares this object with the specified object for order.  Returns a

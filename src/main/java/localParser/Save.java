@@ -1,11 +1,18 @@
 package localParser;
 
+import biweekly.Biweekly;
+import biweekly.ICalendar;
+import biweekly.component.VEvent;
+import biweekly.property.Summary;
+import biweekly.util.Duration;
 import com.sun.istack.internal.NotNull;
+import model.CalendarWrapper;
 import model.Course;
 import model.Deadline;
 
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Date;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -89,8 +96,33 @@ public class Save extends Parser {
      */
     @Override
     public synchronized boolean Ics() {
-        // TODO feature in the future
-        throw new RuntimeException("Method not supported");
+        // create the ICalendar
+        ICalendar ical = new ICalendar();
+        for (String courseName: this.allCourses.keySet()) {
+            TreeMap<String, Deadline> deadlines = this.allCourses.get(courseName).getDeadlines();
+            for (String deadlineName : deadlines.keySet()) {
+                Deadline deadline = deadlines.get(deadlineName);
+                VEvent event = new VEvent();
+                Summary summary = event.setSummary(courseName + ": " + deadlineName);
+                summary.setLanguage("en-us");
+
+                Date start = CalendarWrapper.createJavaDate(deadline.getYear(),
+                        deadline.getMonth(), deadline.getDay(), deadline.getHour(), deadline.getMinute());
+                event.setDateStart(start);
+
+                Duration duration = new Duration.Builder().hours(1).build();
+                event.setDuration(duration);
+
+                event.setDescription("Status = " + deadline.getStatus() +
+                        System.lineSeparator() + "Link = " + deadline.getLink());
+
+                ical.addEvent(event);
+
+            }
+        }
+        writer.print(Biweekly.write(ical).go());
+        writer.close();
+        return true;
     }
 
     /**
@@ -102,7 +134,32 @@ public class Save extends Parser {
      */
     @Override
     public synchronized boolean Csv() {
-        // TODO feature in the future
-        throw new RuntimeException("Method not supported");
+        writer.println("Course Name, Deadline Name, Month, Day, Year, Hour, Minute, Status, Link");
+        for (String courseName: this.allCourses.keySet()) {
+            TreeMap<String, Deadline> deadlines = this.allCourses.get(courseName).getDeadlines();
+            for (String deadlineName : deadlines.keySet()) {
+                Deadline deadline = deadlines.get(deadlineName);
+                writer.print(deadline.getCourseName());
+                writer.print(",");
+                writer.print(deadline.getName());
+                writer.print(",");
+                writer.print(deadline.getMonth());
+                writer.print(",");
+                writer.print(deadline.getDay());
+                writer.print(",");
+                writer.print(deadline.getYear());
+                writer.print(",");
+                writer.print(deadline.getHour());
+                writer.print(",");
+                writer.print(deadline.getMinute());
+                writer.print(",");
+                writer.print(deadline.getStatus());
+                writer.print(",");
+                writer.print(deadline.getLink());
+                writer.print("\r\n");
+            }
+        }
+        writer.close();
+        return true;
     }
 }
