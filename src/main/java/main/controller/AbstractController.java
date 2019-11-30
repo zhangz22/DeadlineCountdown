@@ -20,6 +20,8 @@ public abstract class AbstractController implements Operations {
     protected HashSet<String> ignoredCoursesSet;
     /** allDeadlines: a sorted set to store every deadline based on their dates. */
     protected TreeSet<Deadline> allDeadlines;
+    /** settings: program settings */
+    protected Settings settings;
 
     /**
      * This method will return a specified course object given the course name.
@@ -60,7 +62,7 @@ public abstract class AbstractController implements Operations {
      */
     public Deadline getClosestDeadline() {
         for (Deadline d: allDeadlines) {
-            if (d.isAfter(CalendarWrapper.now()) && !this.isIgnoring(d.getCourse())) {
+            if (d.isAfter(CalendarWrapper.now()) && !this.isIgnoring(d.getCourseName()) && !d.getStatus().equals(Deadline.STATUS.FINISHED)) {
                 return d;
             }
         }

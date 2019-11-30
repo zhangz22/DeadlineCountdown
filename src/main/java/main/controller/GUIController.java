@@ -29,7 +29,6 @@ import static main.viewer.Log.*;
 public class GUIController extends AbstractController implements Operations {
     public static final String VERSION = "1.0";
     private GUIViewer frame;
-    private Settings settings;
     private String settingPath;
 
     /**
