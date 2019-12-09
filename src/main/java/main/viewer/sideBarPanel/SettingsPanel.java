@@ -138,7 +138,7 @@ class SettingsPanel extends JPanel {
             @Override
             public void mouseReleased(MouseEvent e) {
                 super.mouseReleased(e);
-                parent.notification("Welcome to main.","You are running version " + GUIController.VERSION,"");
+                parent.notification("Welcome to Deadline Countdown.","You are running version " + GUIController.VERSION,"");
             }
         });
         JButton theme = DeadlineCountdownFactory.createSimpleButton(parent.getFrame().getText("theme_settings"),
