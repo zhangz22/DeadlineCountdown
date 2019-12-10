@@ -56,5 +56,10 @@
            <artifactId>biweekly</artifactId>
            <version>0.6.3</version>
         </dependency>
+        <dependency>
+          <groupId>org.drjekyll</groupId>
+          <artifactId>colorpicker</artifactId>
+          <version>1.3</version>
+        </dependency>
     </dependencies>
 </project>
