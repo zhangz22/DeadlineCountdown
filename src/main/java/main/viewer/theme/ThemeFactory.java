@@ -14,7 +14,7 @@ package main.viewer.theme;
  */
 public class ThemeFactory {
     public static final String[] ALL_THEME = {"default_theme", "light_theme",
-            "dark_theme", "high_contrast_theme", "blue_theme", "submitty_theme", "vs_theme"};
+            "dark_theme", "high_contrast_theme", "blue_theme", "orange_theme", "pink_theme", "submitty_theme", "vs_theme"};
 
     /**
      * This method returns a theme based on the given name
@@ -32,6 +32,10 @@ public class ThemeFactory {
                 return new LightTheme();
             case "blue_theme":
                 return new BlueTheme();
+            case "orange_theme":
+                return new OrangeTheme();
+            case "pink_theme":
+                return new PinkTheme();
             case "submitty_theme":
                 return new SubmittyTheme();
             case "vs_theme":
