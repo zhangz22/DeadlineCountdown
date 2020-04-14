@@ -1,6 +1,7 @@
 package main.viewer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class uses System.out and log files to send debug information
@@ -15,7 +16,7 @@ public class Log {
     public static final String ANSI_PURPLE = "\u001B[35m";
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_WHITE = "\u001B[37m";
-    private static final Logger logger = Logger.getLogger(Log.class);
+    private static final Logger logger = LogManager.getLogger(Log.class);
 
     /**
      * A function to set debug information to the console

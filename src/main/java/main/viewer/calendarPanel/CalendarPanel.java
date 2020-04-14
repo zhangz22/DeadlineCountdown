@@ -354,7 +354,7 @@ public class CalendarPanel extends JPanel {
      * @effects remove a deadline
      */
     public void removeDeadline(String course, String deadlineName, int year, int month, int day) {
-        this.removeSingleDeadlineBlock(new Deadline(year, month, day, 0, 0, deadlineName, course, Deadline.STATUS.DEFAULT, ""));
+        this.removeSingleDeadlineBlock(new Deadline(year, month, day, 0, 0, deadlineName, course, Deadline.STATUS.DEFAULT, Deadline.LINK.NONE));
         this.allDeadlines.remove(deadlineName);
     }
 
@@ -403,7 +403,7 @@ public class CalendarPanel extends JPanel {
         if (status == null) {
             status = Deadline.STATUS.DEFAULT;
         }
-        parent.editDeadline(new Deadline(year, month, day, hour, minute, deadlineName, course, status, ""));
+        parent.editDeadline(new Deadline(year, month, day, hour, minute, deadlineName, course, status, Deadline.LINK.NONE));
     }
 
     /**

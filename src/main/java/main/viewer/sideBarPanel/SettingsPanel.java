@@ -87,6 +87,8 @@ class SettingsPanel extends JPanel {
         JComboBox<String> languageSupport = SideBarFactory.createComboBox(parent.getFrame().getTheme().SIDEBAR_HOVER(),
                 parent.getFrame().getTheme().SIDEBAR_BACKGROUND(), parent.getFrame().getTheme().SIDEBAR_TEXT());
         languageSupport.addItem(parent.getFrame().getText("en_US"));
+        languageSupport.addItem(parent.getFrame().getText("zh_CN"));
+        languageSupport.addItem(parent.getFrame().getText("zh_Hant"));
         languageSupport.setSelectedItem(parent.getFrame().getText(parent.getSettings().getLanguage()));
         languageSupport.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -96,6 +98,10 @@ class SettingsPanel extends JPanel {
                     Object selectedItem = cb.getSelectedItem();
                     if (parent.getFrame().getText("en_US").equals(selectedItem)) {
                         parent.setLanguage("en_US",false);
+                    } else if (parent.getFrame().getText("zh_CN").equals(selectedItem)) {
+                        parent.setLanguage("zh_CN",false);
+                    } else if (parent.getFrame().getText("zh_Hant").equals(selectedItem)) {
+                        parent.setLanguage("zh_Hant",false);
                     } else {
                         Log.debug("DEBUG: [Language support box] selected " + selectedItem);
                     }

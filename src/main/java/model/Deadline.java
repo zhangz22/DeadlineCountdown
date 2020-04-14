@@ -1,5 +1,6 @@
 package model;
 
+import com.sun.istack.internal.NotNull;
 import javafx.util.Pair;
 
 import java.util.Calendar;
@@ -57,18 +58,22 @@ public final class Deadline implements DeadlineInterface, Comparable<Deadline> {
         }
     }
 
+    public static class LINK {
+        public final static String NONE = "";
+    }
+
     /**
      * Basic constructor for Deadline Object
      * @param date_ a Calendar object which represents a deadline time
      * @param name_ the name of a deadline
      * @param course_ the name of the course
      * @param status_ the status of the course
-     * @param link the link of this deadline
-     * @requires date_ != null, name_ != null, course_ != null
+     * @param link the link of this deadline, "" for empty
+     * @requires date_ != null, name_ != null, course_ != null, status_ != null, link != null
      * @modifies date, deadlineName, course
      * @effects create a new Deadline instance
      */
-    public Deadline(CalendarWrapper date_, String name_, String course_, String status_, String link) {
+    public Deadline(CalendarWrapper date_, String name_, String course_, @NotNull String status_, @NotNull String link) {
         this.date = date_;
         this.deadlineName = name_;
         this.courseName = course_;
@@ -86,14 +91,14 @@ public final class Deadline implements DeadlineInterface, Comparable<Deadline> {
      * @param name_ the name of a deadline
      * @param course_ the name of the course
      * @param status_ the status of the course
-     * @param link the link of this deadline
-     * @requires name_ != null, course_ != null
+     * @param link the link of this deadline, "" for empty
+     * @requires name_ != null, course_ != null, status_ != null, link != null
      * @modifies date, name, course
      * @effects create a new Deadline instance
      * @throws CalendarWrapper.CalendarFormatException if the number of date is invalid
      */
     public Deadline(int year, int month, int day, int hour,
-                             int minute, String name_, String course_, String status_, String link)
+                             int minute, String name_, String course_, @NotNull String status_, @NotNull String link)
             throws CalendarWrapper.CalendarFormatException {
         this(new CalendarWrapper(year, month, day ,hour, minute), name_, course_, status_, link);
     }
@@ -458,7 +463,7 @@ public final class Deadline implements DeadlineInterface, Comparable<Deadline> {
      * @see Cloneable
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public Deadline clone() throws CloneNotSupportedException {
         return (Deadline) super.clone();
     }
 }

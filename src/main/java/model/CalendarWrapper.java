@@ -254,6 +254,24 @@ public class CalendarWrapper implements Cloneable, Comparable<CalendarWrapper>  
     }
 
     /**
+     * This function returns the number of days in a specified month
+     *
+     * @param month a number represents the month number. The first month of
+     *              the year starts from 1 (Jan)
+     * @param year the year number
+     * @requires None
+     * @modifies None
+     * @effects None
+     * @return a number represents the number of days in a specified month
+     */
+    public static int getMaxDayNumOfMonth(int month, int year) {
+        CalendarWrapper c = new CalendarWrapper();
+        c.setMonth(month);
+        c.setYear(year);
+        return c.getMaxDayNumOfMonth();
+    }
+
+    /**
      * This function returns the week day of the first day in the month cal is representing
      *
      * @requires None
@@ -352,7 +370,7 @@ public class CalendarWrapper implements Cloneable, Comparable<CalendarWrapper>  
      * @param minute a number indicating the minute within the hour
      * @return a Java Calendar Object
      */
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation", "MagicConstant"})
     public static java.util.Date createJavaDate(final int year, final int month,
                                                 final int day, final int hour,
                                                 final int minute) {
@@ -397,7 +415,7 @@ public class CalendarWrapper implements Cloneable, Comparable<CalendarWrapper>  
     @Override
     public CalendarWrapper clone() throws CloneNotSupportedException {
         CalendarWrapper c = (CalendarWrapper) super.clone();
-        c.cal = this.cal;
+        c.cal = (Calendar) this.cal.clone();
         return c;
     }
 
