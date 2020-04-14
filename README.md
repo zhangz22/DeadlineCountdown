@@ -33,7 +33,7 @@ Customizable theme
 ![Image of CustomizeTheme](docs/customize_theme_preview.png)
 
 ## Stay home
-Due to COVID-19 situation, campus are now rely more on online servers - homeworks,
+Due to COVID-19 situation, campus are now relying more on online servers - homeworks,
 quizzes, exams... We've checked our program and made sure all current features are
 functioning well. Hope our program can help with the experience of online courses.
 Stay home and stay safe.
