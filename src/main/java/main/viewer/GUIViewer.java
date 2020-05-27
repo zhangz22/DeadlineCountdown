@@ -116,6 +116,33 @@ public class GUIViewer extends JFrame {
      */
     public void setUp(boolean restart) {
         // theme
+        this.setUpTheme();
+
+        // get language information
+        this.setUpLocale(restart);
+
+        // notification
+        if (!restart) {
+            this.notification = new Notification(this.controller);
+        }
+
+        // add components
+        this.getContentPane().setLayout(new BorderLayout());
+        this.addCalendar();
+        this.addSideBar();
+
+        // set theme
+        this.setSwingLookAndFeel("");
+    }
+
+    /**
+     * This function generates and sets the theme based on the settings
+     *
+     * @requires None
+     * @modifies theme
+     * @effects generate the theme based on the setting
+     */
+    private void setUpTheme() {
         this.theme = ThemeFactory.createTheme(this.controller.getSettings().getTheme());
         Log.debug("DEBUG: [UIViewerSetup] Using " +
                 this.controller.getSettings().getTheme() + " as current theme");
@@ -140,8 +167,16 @@ public class GUIViewer extends JFrame {
         UIManager.put("RadioButton.light", this.theme.SIDEBAR_TEXT());
         UIManager.put("RadioButton.select", this.theme.SIDEBAR_TEXT());
         UIManager.put("RadioButton.shadow", this.theme.SIDEBAR_TEXT());
+    }
 
-        // get language information
+    /**
+     * This function changes the language of the application
+     *
+     * @param restart a boolean to indicate if the program is restarting
+     * @modifies textResource, controller.settings[Settings.SUPPORTED.START_FROM_SUNDAY]
+     * @effects changes the lanugage based on setting
+     */
+    private void setUpLocale(boolean restart) {
         Locale locale;
         switch (this.controller.getSettings().getLanguage()) {
             case "en_US":
@@ -166,19 +201,6 @@ public class GUIViewer extends JFrame {
         if (!restart) {
             this.controller.setSettings(Settings.SUPPORTED.START_FROM_SUNDAY, textFormat.startsFromSunday() == 1);
         }
-
-        // notification
-        if (!restart) {
-            this.notification = new Notification(this.controller);
-        }
-
-        // add components
-        this.getContentPane().setLayout(new BorderLayout());
-        this.addCalendar();
-        this.addSideBar();
-
-        // set theme
-        setJavaTheme("");
     }
 
     /**
@@ -402,14 +424,14 @@ public class GUIViewer extends JFrame {
     }
 
     /**
-     * This function set the theme of main
+     * This function set the LookAndFeel of main
      *
      * @param themeName the name of the theme
      * @requires None
      * @modifies UIManager
      * @effects None
      */
-    private void setJavaTheme(String themeName) {
+    private void setSwingLookAndFeel(String themeName) {
         switch (themeName) {
             case "JAVA":
                 try {
@@ -761,7 +783,7 @@ public class GUIViewer extends JFrame {
      */
     public void restart() {
         this.getContentPane().removeAll();
-        this.setJavaTheme("JAVA");
+        this.setSwingLookAndFeel("JAVA");
         this.setUp(true);
         this.refreshDeadlines();
     }

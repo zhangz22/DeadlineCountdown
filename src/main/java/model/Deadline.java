@@ -25,7 +25,6 @@ import org.joda.time.Period;
  * courseName -> the deadlineName of the course
  *
  * @creators
- * @creators
  * Deadline(Calendar date_, String name_, String course_)
  *
  * @mutator
