@@ -90,7 +90,7 @@ class DateBlock extends RectangleWithTitle {
             public void menuKeyReleased(MenuKeyEvent e) {
             }
         });
-        addNewDeadline.setForeground(parent.getTheme().RIGHT_MENU_TEXT());
+        addNewDeadline.setForeground(parent.getTheme().RIGHT_MENU_BACKGROUND());
         addNewDeadline.setBackground(parent.getTheme().RIGHT_MENU_BACKGROUND());
         addNewDeadline.setFont(new Font(ViewerFont.XHEI, Font.PLAIN, 14));
         addNewDeadline.addActionListener(e2 -> parent.handleEditSignal("","",0,0,Integer.valueOf(date),0,0,null));

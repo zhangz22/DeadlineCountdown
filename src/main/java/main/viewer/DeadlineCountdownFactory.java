@@ -297,10 +297,10 @@ public class DeadlineCountdownFactory {
             }
 
             // resize
-            ImageIcon saveIcon = new ImageIcon(newImage);
-            saveIcon = new ImageIcon(saveIcon.getImage().getScaledInstance(35, 35,  Image.SCALE_SMOOTH));
+            ImageIcon icon = new ImageIcon(newImage);
+            icon = new ImageIcon(icon.getImage().getScaledInstance(35, 35,  Image.SCALE_SMOOTH));
 
-            result.setIcon(saveIcon);
+            result.setIcon(icon);
         } catch (Exception e) {
             e.printStackTrace();
         }

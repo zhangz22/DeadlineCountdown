@@ -76,8 +76,8 @@ public class SideBarPanel extends JPanel {
      */
     public SideBarPanel(HashMap<String, Deadline> deadlines, String username, GUIController parent) {
         super();
-        this.setPreferredSize(new Dimension(350, 0));
-        this.setMinimumSize(new Dimension(350, 0));
+        this.setPreferredSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 0));
+        this.setMinimumSize(new Dimension(SideBarPanel.SIDEBAR_WIDTH, 0));
         this.setBackground(parent.getFrame().getTheme().SIDEBAR_BACKGROUND());
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.allDeadlines = (deadlines != null) ? deadlines: (new HashMap<>());

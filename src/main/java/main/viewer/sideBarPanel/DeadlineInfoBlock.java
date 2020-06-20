@@ -87,7 +87,7 @@ class DeadlineInfoBlock extends JPanel implements DeadlineBlockInterface {
 
         // add the right-click menu
         JPopupMenu menu = DeadlineCountdownFactory.createDeadlineBlockRightMenu(this,
-                parent.getMainmainGUI().getFrame().getTheme().SIDEBAR_TEXT(),
+                parent.getMainmainGUI().getFrame().getTheme().RIGHT_MENU_BACKGROUND(),
                 parent.getMainmainGUI().getFrame().getTheme().SIDEBAR_BACKGROUND());
         this.setComponentPopupMenu(menu);
         deadlineName.setComponentPopupMenu(menu);

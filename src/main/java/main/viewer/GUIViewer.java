@@ -741,7 +741,7 @@ public class GUIViewer extends JFrame {
                 message = closest.getName() + " (" + closest.getCourseName() + ") " + this.getText("due_in")
                         + this.getTextFormat().getRemainingText(closest, CalendarWrapper.now(), false);
             }
-            this.notification("main is running in background.", message, "");
+            this.notification("Deadline countdown is running in background.", message, "");
         } else {
             this.setVisible(true);
         }
