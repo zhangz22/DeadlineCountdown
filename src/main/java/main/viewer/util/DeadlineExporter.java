@@ -15,21 +15,21 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DeadlineExporter {
     private Deadline deadline;
-    private GUIController mainmain;
+    private GUIController controller;
     private String caller;
 
     /**
      * Constructor
      * @param deadline the deadline being exported
-     * @param mainmain the main GUIController for notifications and text formats
+     * @param controller the main GUIController for notifications and text formats
      * @param caller the class calling this method
      * @requires deadline != null, mainmain != null, caller != null
      * @modifies deadline, mainmain, caller
      * @effects create a new DeadlineExporter instance
      */
-    public DeadlineExporter(Deadline deadline, GUIController mainmain, String caller) {
+    public DeadlineExporter(Deadline deadline, GUIController controller, String caller) {
         this.deadline = deadline;
-        this.mainmain = mainmain;
+        this.controller = controller;
         this.caller = caller;
     }
 
@@ -46,8 +46,8 @@ public class DeadlineExporter {
         // save to
         JFileChooser fileChooser = DeadlineCountdownFactory.createFileChooser(
                 this.deadline.getName(),
-                this.mainmain.getFrame().getTextResource());
-        int result = fileChooser.showSaveDialog(this.mainmain.getFrame());
+                this.controller.getFrame().getTextResource());
+        int result = fileChooser.showSaveDialog(this.controller.getFrame());
 
         if (result == JFileChooser.APPROVE_OPTION) {
             Pair<File, String> choice = DeadlineCountdownFactory.getFileFromFileChooser(fileChooser);
@@ -57,8 +57,8 @@ public class DeadlineExporter {
 
             if (file == null) {
                 Log.debug("Debug: [" + this.caller + "] trying to export to a null file.");
-                this.mainmain.notification(
-                        this.mainmain.getFrame().getText("export_failed"), "", "");
+                this.controller.notification(
+                        this.controller.getFrame().getText("export_failed"), "", "");
                 return;
             }
             Log.debug("Debug: [" + this.caller + "] "
@@ -73,29 +73,29 @@ public class DeadlineExporter {
                     writer = new PrintWriter(file);
                 } catch (IOException e) {
                     e.printStackTrace();
-                    this.mainmain.notification(this.mainmain.getFrame().getText("export_failed"),
-                            this.mainmain.getFrame().getText("saving_to")
+                    this.controller.notification(this.controller.getFrame().getText("export_failed"),
+                            this.controller.getFrame().getText("saving_to")
                             + "\n"
-                            + this.mainmain.getFrame().getText("error_code")
+                            + this.controller.getFrame().getText("error_code")
                             + e.getMessage(), "");
                     return;
                 }
                 // save local files
-                if (this.mainmain.getSettings().isSaveLocalUnavailable()) {
+                if (this.controller.getSettings().isSaveLocalUnavailable()) {
                     Log.error("DEBUG: [" + caller + "] Settings return " +
                             "'isSaveLocalUnavailable'");
-                    this.mainmain.notification(this.mainmain.getFrame().getText("export_failed"),
-                            this.mainmain.getFrame().getText("export_access_denied") + "\n" +
-                            this.mainmain.getFrame().getText("export_please_restart"),"");
+                    this.controller.notification(this.controller.getFrame().getText("export_failed"),
+                            this.controller.getFrame().getText("export_access_denied") + "\n" +
+                            this.controller.getFrame().getText("export_please_restart"),"");
                     return;
                 }
                 localParser.Parser save = new localParser.Save(courseMap, writer);
-                Thread thread = localParser.Parser.getParserThread(save, extSelected, this.mainmain, true);
+                Thread thread = localParser.Parser.getParserThread(save, extSelected, this.controller, true);
                 thread.run();
             } else {
                 Log.debug("Debug: [" + this.caller + "] trying to export to a directory file.");
-                this.mainmain.notification(this.mainmain.getFrame().getText("export_failed"),
-                        file.getName() + " " + this.mainmain.getFrame().getText("export_is_directory"),
+                this.controller.notification(this.controller.getFrame().getText("export_failed"),
+                        file.getName() + " " + this.controller.getFrame().getText("export_is_directory"),
                         "");
             }
         }

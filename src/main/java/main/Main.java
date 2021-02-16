@@ -16,9 +16,9 @@ public class Main {
      */
     private static String getUserAppDirectory() {
         if (System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH).contains("mac"))
-            return System.getProperty("user.home") + "/Library/Application Support/main";
+            return System.getProperty("user.home") + "/Library/Application Support/DeadlineCountdown";
         else if (System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH).contains("win"))
-            return System.getenv("APPDATA") + "/main";
+            return System.getenv("APPDATA") + "/DeadlineCountdown";
         else
             return "./";
     }

@@ -160,7 +160,7 @@ public class SubmittyAccess {
             System.err.println("DEBUG: [accessDriver] Parsing current course " + courseName);
 
             // generate a course object
-            Course currCourse = new Course(courseName.replace("Fall 2019", "").trim());
+            Course currCourse = new Course(courseName.replace("Fall 2020", "").trim());
 
             // Get information about current course
             currCourseBtn.click();

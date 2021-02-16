@@ -58,7 +58,7 @@ public class GUIController extends AbstractController implements Operations {
             }
         } else if (System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH).contains("mac")) {
             // macOS
-            this.settingPath = System.getProperty("user.home") + "/Library/Application Support/main/";
+            this.settingPath = System.getProperty("user.home") + "/Library/Application Support/DeadlineCountdown/";
             File file = new File(this.settingPath);
             if (!file.exists()) {
                 folderResult = file.mkdirs();
